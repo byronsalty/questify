@@ -33,7 +33,7 @@ alias Questify.Games
   "name" => "Lobby",
   "description" => """
   You are in a opulent mansion and you want to get to the pool to attend a party.
-  You see a glass backdoor to go outside in the backyard. You also see a dark creepy staircase going to downward.
+  You see a glass backdoor to go outside in the backyard. You also see a dark creepy staircase going downward.
   """,
   "img_url" => "https://d8g32g7q3zoxw.cloudfront.net/hello_lobby.png",
   "is_terminal" => false,

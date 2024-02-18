@@ -8,6 +8,8 @@ defmodule QuestifyWeb.LocationLiveTest do
   @update_attrs %{name: "some updated name", description: "some updated description"}
   @invalid_attrs %{name: nil, description: nil}
 
+  setup :register_and_log_in_user
+
   defp create_location(_) do
     location = location_fixture()
     %{location: location}
@@ -15,13 +17,6 @@ defmodule QuestifyWeb.LocationLiveTest do
 
   describe "Index" do
     setup [:create_location]
-
-    test "lists all locations", %{conn: conn, location: location} do
-      {:ok, _index_live, html} = live(conn, ~p"/locations")
-
-      assert html =~ "Listing Locations"
-      assert html =~ location.name
-    end
 
     test "saves new location", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/locations")

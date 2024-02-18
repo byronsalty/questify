@@ -9,6 +9,7 @@ defmodule Questify.Games.Location do
     field :is_terminal, :boolean, default: false
 
     belongs_to :quest, Questify.Games.Quest
+    has_many :actions, Questify.Games.Action, foreign_key: :from_id
 
     timestamps()
   end

@@ -14,7 +14,7 @@
   <:item title="Is terminal"><%= @action.is_terminal %></:item>
 </.list>
 
-<.back navigate={~p"/actions"}>Back to actions</.back>
+<.back navigate={~p"/locations/#{@action.from}"}>Back to Location</.back>
 
 <.modal :if={@live_action == :edit} id="action-modal" show on_cancel={JS.patch(~p"/actions/#{@action}")}>
   <.live_component

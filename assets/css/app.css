@@ -3,3 +3,42 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+  font-family: 'Press Start 2P', cursive;
+}
+@font-face {
+  font-family: 'RetroGaming';
+  src: url('/path/to/your/retro-font.woff2') format('woff2');
+}
+
+.font-retro {
+  font-family: 'RetroGaming', sans-serif;
+}
+
+.game-image {
+  max-width: 100%;
+  border: 3px solid #dcb439; /* Gold border for the image */
+}
+
+.game-description {
+  background-color: #111; /* Dark background for the description box */
+  color: #fff;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid #dcb439; /* Gold border for the description box */
+}
+
+.command-input {
+  background-color: #111; /* Dark background for the input area */
+  color: #fff;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  border: none;
+}
+
+/* Style for the command input to stand out */
+.command-input:focus {
+  outline: 2px solid #dcb439; /* Gold outline for focus state */
+}

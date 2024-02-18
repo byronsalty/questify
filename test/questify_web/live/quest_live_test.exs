@@ -8,6 +8,8 @@ defmodule QuestifyWeb.QuestLiveTest do
   @update_attrs %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
   @invalid_attrs %{name: nil, description: nil, slug: nil}
 
+  setup :register_and_log_in_user
+
   defp create_quest(_) do
     quest = quest_fixture()
     %{quest: quest}

@@ -21,6 +21,7 @@ defmodule QuestifyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/start/:id", PageController, :start
 
   end
 
@@ -82,13 +83,13 @@ defmodule QuestifyWeb.Router do
 
       # live "/locations", LocationLive.Index, :index
       live "/locations/:quest_id/new", LocationLive.Index, :new
-      live "/locations/:quest_id/:id/edit", LocationLive.Index, :edit
+      live "/locations/:id/edit", LocationLive.Index, :edit
 
-      live "/locations/:quest_id/:id", LocationLive.Show, :show
-      live "/locations/:quest_id/:id/show/edit", LocationLive.Show, :edit
+      live "/locations/:id", LocationLive.Show, :show
+      live "/locations/:id/show/edit", LocationLive.Show, :edit
 
       # live "/actions", ActionLive.Index, :index
-      live "/actions/new", ActionLive.Index, :new
+      live "/actions/:location_id/new", ActionLive.Index, :new
       live "/actions/:id/edit", ActionLive.Index, :edit
 
       live "/actions/:id", ActionLive.Show, :show

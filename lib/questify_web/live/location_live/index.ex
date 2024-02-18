@@ -6,7 +6,8 @@ defmodule QuestifyWeb.LocationLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :locations, Games.list_locations())}
+    # {:ok, stream(socket, :locations, Games.list_locations())}
+    {:ok, socket}
   end
 
   @impl true
@@ -15,7 +16,11 @@ defmodule QuestifyWeb.LocationLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    location = Games.get_location!(id)
+    quest = Questify.Games.get_quest!(location.quest_id)
+
     socket
+    |> assign(:quest, quest)
     |> assign(:page_title, "Edit Location")
     |> assign(:location, Games.get_location!(id))
   end

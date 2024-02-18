@@ -2,6 +2,7 @@ defmodule QuestifyWeb.ActionLive.Show do
   use QuestifyWeb, :live_view
 
   alias Questify.Games
+  alias Questify.Repo
 
   @impl true
   def mount(_params, _session, socket) do
@@ -10,10 +11,12 @@ defmodule QuestifyWeb.ActionLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
+    action = Games.get_action!(id) |> Repo.preload([:from])
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:action, Games.get_action!(id))}
+     |> assign(:action, action)}
   end
 
   defp page_title(:show), do: "Show Action"

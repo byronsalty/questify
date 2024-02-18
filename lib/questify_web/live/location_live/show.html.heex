@@ -11,9 +11,24 @@
 <.list>
   <:item title="Name"><%= @location.name %></:item>
   <:item title="Description"><%= @location.description %></:item>
+  <:item title="Image"><img src={@location.img_url} class="w-auto" /></:item>
 </.list>
 
-<.back navigate={~p"/locations"}>Back to locations</.back>
+<.table
+  id="actions"
+  rows={@location.actions}
+  row_click={fn action -> JS.navigate(~p"/actions/#{action}") end}
+>
+  <:col :let={action} label="Command"><%= action.command %></:col>
+  <:action :let={action}>
+    <div class="sr-only">
+      <.link navigate={~p"/actions/#{action}"}>Show</.link>
+    </div>
+    <.link patch={~p"/actions/#{action}/edit"}>Edit</.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/quests/#{@location.quest}"}>Back to Quest</.back>
 
 <.modal :if={@live_action == :edit} id="location-modal" show on_cancel={JS.patch(~p"/locations/#{@location}")}>
   <.live_component
@@ -22,6 +37,7 @@
     title={@page_title}
     action={@live_action}
     location={@location}
+    quest={@quest}
     patch={~p"/locations/#{@location}"}
   />
 </.modal>

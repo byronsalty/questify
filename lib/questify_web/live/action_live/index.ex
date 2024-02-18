@@ -15,13 +15,18 @@ defmodule QuestifyWeb.ActionLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    action = Games.get_action!(id)
+
     socket
+    |> assign(:from_id, action.from_id)
     |> assign(:page_title, "Edit Action")
-    |> assign(:action, Games.get_action!(id))
+    |> assign(:action, action)
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, %{"location_id" => from_id}) do
+
     socket
+    |> assign(:from_id, from_id)
     |> assign(:page_title, "New Action")
     |> assign(:action, %Action{})
   end

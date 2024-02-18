@@ -4,6 +4,9 @@ defmodule QuestifyWeb.ActionLiveTest do
   import Phoenix.LiveViewTest
   import Questify.GamesFixtures
 
+
+  setup :register_and_log_in_user
+
   @create_attrs %{command: "some command", description: "some description", is_terminal: true}
   @update_attrs %{command: "some updated command", description: "some updated description", is_terminal: false}
   @invalid_attrs %{command: nil, description: nil, is_terminal: false}
@@ -15,13 +18,6 @@ defmodule QuestifyWeb.ActionLiveTest do
 
   describe "Index" do
     setup [:create_action]
-
-    test "lists all actions", %{conn: conn, action: action} do
-      {:ok, _index_live, html} = live(conn, ~p"/actions")
-
-      assert html =~ "Listing Actions"
-      assert html =~ action.command
-    end
 
     test "saves new action", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/actions")

@@ -1,6 +1,5 @@
 <.header>
-  Quest <%= @quest.id %>
-  <:subtitle>This is a quest record from your database.</:subtitle>
+  Quest: <%= @quest.name %>
   <:actions>
     <.link patch={~p"/quests/#{@quest}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit quest</.button>
@@ -20,14 +19,14 @@
 <.table
   id="locations"
   rows={@locations}
-  row_click={fn location -> JS.navigate(~p"/locations/#{@quest}/#{location}") end}
+  row_click={fn location -> JS.navigate(~p"/locations/#{location}") end}
 >
-  <:col :let={location} label="Name"><%= location.name %></:col>
+  <:col :let={location} label="Locations"><%= location.name %></:col>
   <:action :let={location}>
     <div class="sr-only">
-      <.link navigate={~p"/locations/#{@quest}/#{location}"}>Show</.link>
+      <.link navigate={~p"/locations/#{location}"}>Show</.link>
     </div>
-    <.link patch={~p"/locations/#{@quest}/#{location}/edit"}>Edit</.link>
+    <.link patch={~p"/locations/#{location}/edit"}>Edit</.link>
   </:action>
 </.table>
 

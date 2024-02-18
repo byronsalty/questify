@@ -13,6 +13,10 @@ defmodule QuestifyWeb.Router do
     plug :fetch_current_user
   end
 
+  pipeline :user do
+    plug :put_root_layout, html: {QuestifyWeb.Layouts, :admin_root}
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -21,8 +25,9 @@ defmodule QuestifyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/start/:id", PageController, :start
+    get "/start/:slug", PageController, :start
 
+    live "/play/:id", PlayLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
@@ -64,7 +69,7 @@ defmodule QuestifyWeb.Router do
   end
 
   scope "/", QuestifyWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :user, :require_authenticated_user]
 
 
 

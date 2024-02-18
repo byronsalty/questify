@@ -10,6 +10,11 @@
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
+    <script>
+      window.onload = function() {
+        document.querySelector('.command-input').focus();
+      };
+    </script>
   </head>
   <body class="bg-black antialiased text-yellow-400">
     <%= @inner_content %>

@@ -3,12 +3,12 @@
   <div class="text-center">
     <h1 class="text-6xl mb-4">Questify</h1>
     <p class="text-2xl my-4">COPYRIGHT 2024</p>
-    <p class="text-2xl">SaltyLab Productions</p>
+    <p class="text-2xl">SaltyLabs Productions</p>
     <div class="justify-center mt-8">
       <!-- Icon representations -->
       <p class="text-2xl my-4 text-white">🎮</p>
       <%= for quest <- @quests do %>
-      <p class="text-xl ml-4 text-white"><.link navigate={~p"/start/#{quest.id}"}><%= quest.name %></.link></p>
+      <p class="text-xl ml-4 text-white"><.link navigate={~p"/start/#{quest.slug}"}><%= quest.name %></.link></p>
       <% end %>
     </div>
   </div>

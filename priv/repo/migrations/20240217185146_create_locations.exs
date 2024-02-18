@@ -7,6 +7,7 @@ defmodule Questify.Repo.Migrations.CreateLocations do
       add :description, :text
       add :img_url, :string
       add :is_terminal, :boolean
+      add :is_starting, :boolean
       add :quest_id, references(:quests, on_delete: :nothing)
 
       timestamps()

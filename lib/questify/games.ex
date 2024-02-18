@@ -37,6 +37,8 @@ defmodule Questify.Games do
   """
   def get_quest!(id), do: Repo.get!(Quest, id)
 
+  def get_quest_by_slug!(slug), do: Repo.get_by!(Quest, slug: slug) |> Repo.preload([:locations])
+
   @doc """
   Creates a quest.
 

@@ -37,6 +37,7 @@ alias Questify.Games
   """,
   "img_url" => "https://d8g32g7q3zoxw.cloudfront.net/hello_lobby.png",
   "is_terminal" => false,
+  "is_starting" => true,
   "quest_id" => hello_quest.id
 })
 
@@ -77,7 +78,8 @@ alias Questify.Games
   You see a handwritten note scrawled on the wall that says 'Beware of the basement'
   """,
   "quest_id" => hello_quest.id,
-  "from_id" => hello_location_lobby.id
+  "from_id" => hello_location_lobby.id,
+  "to_id" => hello_location_lobby.id
 })
 
 {:ok, hello_action_3} = Games.create_action(%{
@@ -89,3 +91,7 @@ alias Questify.Games
   "from_id" => hello_location_lobby.id,
   "to_id" => hello_location_basement.id
 })
+
+
+
+Code.eval_file("priv/repo/game_seeds/echo_cavern.exs")

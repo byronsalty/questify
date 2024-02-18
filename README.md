@@ -1,3 +1,5 @@
+![Questify!](https://d8g32g7q3zoxw.cloudfront.net/questify_sm.png "Questify!")
+
 # Questify
 
 This is a intended to be a reasonably simple application that will be used to demonstrate various AI and LLM based capabilities in the context of an Elixir/Phoenix app.

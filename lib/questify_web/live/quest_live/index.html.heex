@@ -1,0 +1,44 @@
+<.header>
+  Listing Quests
+  <:actions>
+    <.link patch={~p"/quests/new"}>
+      <.button>New Quest</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="quests"
+  rows={@streams.quests}
+  row_click={fn {_id, quest} -> JS.navigate(~p"/quests/#{quest}") end}
+>
+  <:col :let={{_id, quest}} label="Name"><%= quest.name %></:col>
+  <:col :let={{_id, quest}} label="Slug"><%= quest.slug %></:col>
+  <:col :let={{_id, quest}} label="Description"><%= quest.description %></:col>
+  <:action :let={{_id, quest}}>
+    <div class="sr-only">
+      <.link navigate={~p"/quests/#{quest}"}>Show</.link>
+    </div>
+    <.link patch={~p"/quests/#{quest}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, quest}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: quest.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="quest-modal" show on_cancel={JS.patch(~p"/quests")}>
+  <.live_component
+    module={QuestifyWeb.QuestLive.FormComponent}
+    id={@quest.id || :new}
+    title={@page_title}
+    current_user={@current_user}
+    action={@live_action}
+    quest={@quest}
+    patch={~p"/quests"}
+  />
+</.modal>

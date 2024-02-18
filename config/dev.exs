@@ -6,7 +6,7 @@ config :questify, Questify.Repo,
   password: "quest",
   hostname: "localhost",
   port: 5532,
-  database: "questify_db",
+  database: "quest_db",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

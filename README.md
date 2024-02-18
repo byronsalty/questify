@@ -11,6 +11,7 @@ Running a local dev instance:
 
   * Run `mix setup` to install and setup dependencies
   * Run the dev db with `dev/sh/runDB.sh`
+  * Run `mix ecto.setup` to create and seed database.
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4500`](http://localhost:4500) from your browser.

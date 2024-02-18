@@ -1,0 +1,28 @@
+<.header>
+  Action <%= @action.id %>
+  <:subtitle>This is a action record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/actions/#{@action}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit action</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Command"><%= @action.command %></:item>
+  <:item title="Description"><%= @action.description %></:item>
+  <:item title="Is terminal"><%= @action.is_terminal %></:item>
+</.list>
+
+<.back navigate={~p"/actions"}>Back to actions</.back>
+
+<.modal :if={@live_action == :edit} id="action-modal" show on_cancel={JS.patch(~p"/actions/#{@action}")}>
+  <.live_component
+    module={QuestifyWeb.ActionLive.FormComponent}
+    id={@action.id}
+    title={@page_title}
+    action={@live_action}
+    action={@action}
+    patch={~p"/actions/#{@action}"}
+  />
+</.modal>

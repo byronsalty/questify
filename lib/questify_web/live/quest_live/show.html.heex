@@ -1,0 +1,45 @@
+<.header>
+  Quest <%= @quest.id %>
+  <:subtitle>This is a quest record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/quests/#{@quest}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit quest</.button>
+    </.link>
+    <.link patch={~p"/locations/#{@quest}/new"} phx-click={JS.push_focus()}>
+      <.button>New Location</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @quest.name %></:item>
+  <:item title="Slug"><%= @quest.slug %></:item>
+  <:item title="Description"><%= @quest.description %></:item>
+</.list>
+
+<.table
+  id="locations"
+  rows={@locations}
+  row_click={fn location -> JS.navigate(~p"/locations/#{@quest}/#{location}") end}
+>
+  <:col :let={location} label="Name"><%= location.name %></:col>
+  <:action :let={location}>
+    <div class="sr-only">
+      <.link navigate={~p"/locations/#{@quest}/#{location}"}>Show</.link>
+    </div>
+    <.link patch={~p"/locations/#{@quest}/#{location}/edit"}>Edit</.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/quests"}>Back to quests</.back>
+
+<.modal :if={@live_action == :edit} id="quest-modal" show on_cancel={JS.patch(~p"/quests/#{@quest}")}>
+  <.live_component
+    module={QuestifyWeb.QuestLive.FormComponent}
+    id={@quest.id}
+    title={@page_title}
+    action={@live_action}
+    quest={@quest}
+    patch={~p"/quests/#{@quest}"}
+  />
+</.modal>

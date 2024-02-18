@@ -1,0 +1,27 @@
+<.header>
+  Location <%= @location.id %>
+  <:subtitle>This is a location record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/locations/#{@location}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit location</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @location.name %></:item>
+  <:item title="Description"><%= @location.description %></:item>
+</.list>
+
+<.back navigate={~p"/locations"}>Back to locations</.back>
+
+<.modal :if={@live_action == :edit} id="location-modal" show on_cancel={JS.patch(~p"/locations/#{@location}")}>
+  <.live_component
+    module={QuestifyWeb.LocationLive.FormComponent}
+    id={@location.id}
+    title={@page_title}
+    action={@live_action}
+    location={@location}
+    patch={~p"/locations/#{@location}"}
+  />
+</.modal>

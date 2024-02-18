@@ -5,7 +5,29 @@ This is a intended to be a reasonably simple application that will be used to de
 The app will be a game will be modeled roughly in the style of a [Choose Your Own Adventure](https://en.wikipedia.org/wiki/Choose_Your_Own_Adventure) book, where the player is given a text prompt and asked to navigate a series of choices that will result in a non-linear story / game.
 
 
+## Codebase and Context
+
+This game and codebase are part of an article and speaking series, with the initial intention of being small and simple enough to be easily understood over the course of a presentation, but full featured enough to be a realistic use case.
+
+This code base is organized in increasing levels of integration with LLM and AI capabilities, as roughly defined [in this article.](https://medium.com/@byronsalty/the-llm-analogy-f75b0ccc0977)
+
+Redefined here we'll have:
+  * Level 0 - Just a working app with no AI / LLM integrations
+  * Level 1 - Integration with simple APIs
+  * Level 2 - Retrieval Augmented Generation (RAG) architecture
+  * Level 3 - Agent-based behaviors
+
+The intention of this code base is to show these various integration levels so it will start out with each level as a separate branch for developers to dig through as part of this article and presentation series.
+
+More information about the associated presentation can be [found here.](https://byronsalty.com/phoenix_llm.html)
+
+
 ## Local Dev
+
+*Because of the use of Postgres as vector database, I highly recommend using docker for your local db with the provided scripts.*
+
+I would also suggest not keeping anything too permanent in the database (don't world build by hand), because you'll likely `reset` the database a few times as you navigate to different branches.
+
 
 Running a local dev instance:
 
@@ -16,25 +38,8 @@ Running a local dev instance:
 
 Now you can visit [`localhost:4500`](http://localhost:4500) from your browser.
 
-## Prompting an Adventure
 
-Here are some prompts used to create a story:
-
-```
-User
-Help me write an interesting Choose Your Own Adventure story. Let's start with an overall plot, two different possible positive outcomes and two different possible negative outcomes.
-
-Ok. Given that plot and possible outcomes, we are going to create the world of this story. This is for a game which is based on various locations that the player can explore and learn more. Can you tell me 10 locations involved in this story? One of them should be the starting location and each final outcome should have a location associated as well.
-
-User
-These are great. Could you give a description for each in the style of a book where you are telling the reader what they are seeing?
-
-Create now could you define a set of commands/actions that would be available at each location and which location they would take you to? (We don't need any for the Outcome locations)
-
-These are great. The format that I need is a Description (what the person learns if they are talking or investigating, or seeing if they move) 
-```
-
-## Learn more
+## Learn more about Elixir / Phoenix
 
   * Official website: https://www.phoenixframework.org/
   * Guides: https://hexdocs.pm/phoenix/overview.html

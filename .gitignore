@@ -40,6 +40,8 @@ data_test
 
 connectDB*prod*
 
+
 std.out
 
 *.swp
+.DS_Store

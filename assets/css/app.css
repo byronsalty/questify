@@ -42,3 +42,28 @@ body {
 .command-input:focus {
   outline: 2px solid #dcb439; /* Gold outline for focus state */
 }
+
+.arcade-link {
+  /* Other styles for your link */
+  position: relative; /* Needed for absolute positioning of the pseudo-element */
+  text-decoration: none; /* Optional: removes the underline */
+  color: #dcb439; /* Gold color text */
+  padding-left: 1.5em; /* Space for the icon */
+}
+
+.arcade-link:hover::before {
+  content: '➤'; /* You can use an arrow or any character here */
+  position: absolute;
+  left: 0; /* Aligns the icon to the left */
+  top: 50%; /* Centers it vertically */
+  transform: translateY(-50%); /* Aligns it perfectly centered */
+  color: #dcb439; /* Gold color text, or choose a different color for the icon */
+  font-size: 1em; /* Adjust the size as needed */
+}
+
+/* Custom styles for the container */
+.arcade-links {
+  background-color: #000000; /* Black background */
+  padding: 1em;
+  display: inline-block; /* Or 'block', depending on your layout */
+}

@@ -1,0 +1,18 @@
+
+<div class="flex justify-center items-center h-screen mt-4 ">
+  <div class="text-center justify-center items-center w-3/4">
+    <div class="flex w-auto justify-center items-center">
+      <img src={@quest.img_url} class="h-1/2 w-1/2 game-image" />
+    </div>
+    <p class="text-xl mt-2"><%= @quest.description %></p>
+    <div class="justify-center arcade-links">
+      <!-- Icon representations -->
+      <p class="text-xl my-4 text-white">
+        <.link navigate={~p"/start/#{@quest.slug}"} class="arcade-link">Play</.link>
+      </p>
+      <p class="text-xl my-4 text-white">
+        <.link navigate={~p"/"} class="arcade-link">Go Back</.link>
+      </p>
+    </div>
+  </div>
+</div>

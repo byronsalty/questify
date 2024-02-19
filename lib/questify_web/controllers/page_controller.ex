@@ -8,6 +8,13 @@ defmodule QuestifyWeb.PageController do
 
     render(conn, :home, quests: quests, layout: false)
   end
+  def view(conn, %{"slug" => slug}) do
+    IO.inspect(slug, label: "slug")
+    quest = Questify.Games.get_quest_by_slug!(slug)
+
+
+    render(conn, :view, quest: quest, layout: false)
+  end
   def start(conn, %{"slug" => slug}) do
     IO.inspect(slug, label: "slug")
     quest = Questify.Games.get_quest_by_slug!(slug)

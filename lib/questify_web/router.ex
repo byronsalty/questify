@@ -25,6 +25,7 @@ defmodule QuestifyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/view/:slug", PageController, :view
     get "/start/:slug", PageController, :start
 
     live "/play/:id", PlayLive.Show, :show

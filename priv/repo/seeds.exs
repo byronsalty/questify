@@ -23,8 +23,9 @@ alias Questify.Games
 {:ok, hello_quest} = Games.create_quest(%{
   "name" => "Hello World",
   "slug" => "hello",
+  "img_url" => "https://d8g32g7q3zoxw.cloudfront.net/hello_world.webp",
   "description" => """
-  A simple game to test out mechanics.
+  A simple game to test out game mechanics. You find yourself alone in a beautiful mansion during a summer party, but something sinister lurks nearby. Can you resist the temptation?
   """,
   "creator_id" => test_user.id
 })

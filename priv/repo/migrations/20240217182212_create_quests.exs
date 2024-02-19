@@ -6,6 +6,7 @@ defmodule Questify.Repo.Migrations.CreateQuests do
       add :name, :string
       add :slug, :string
       add :description, :text
+      add :img_url, :string
       add :creator_id, references(:users, on_delete: :nothing)
 
       timestamps()

@@ -1,5 +1,6 @@
 # Things to add still
 
+1. Create actual game plays
 1. Image Gen 
   * (Create Location images dynamically)
 1. Simple LLM response integration (S)

@@ -7,6 +7,7 @@ test_user = Accounts.get_user_by_email("test@test.com")
 {:ok, echo} = Games.create_quest(%{
   "name" => "The Secrets of Echo Cavern",
   "slug" => "echo",
+  "img_url" => "https://d8g32g7q3zoxw.cloudfront.net/echo_cavern.webp",
   "description" => """
   In the small, seemingly quiet town of Echo Ridge, nestled between dense forests and shadowy hills, lies the mysterious Echo Cavern. Legends speak of ancient treasures and unspeakable horrors lurking within its depths. Recently, a series of strange disappearances have reignited interest and fear of the cavern's rumored curse.
   """,

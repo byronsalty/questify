@@ -20,6 +20,7 @@ config :questify, QuestifyWeb.Endpoint,
   pubsub_server: Questify.PubSub,
   live_view: [signing_salt: "6eUx6aZE"]
 
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -58,6 +59,9 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+
+config :questify, Questify.Repo, types: Questify.PostgrexTypes
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

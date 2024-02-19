@@ -51,11 +51,10 @@ defmodule QuestifyWeb.PlayLive.Show do
   def handle_event("do_action", %{"command" => value}, socket) do
     # Do something with the value
 
-    action_options = Games.get_location_action_options(socket.assigns.location)
+    # action_options = Games.get_location_action_options(socket.assigns.location)
+    location = socket.assigns.location
 
-    chosen = action_options
-      |> Enum.filter(fn {ind, _, id} -> "#{ind}" == value end)
-      |> Enum.map(fn {_, _, id} -> Games.get_action!(id) end)
+    chosen = Games.get_action_by_text(location, value)
 
     action_output =
       if Enum.count(chosen) > 0 do

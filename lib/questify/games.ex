@@ -4,6 +4,8 @@ defmodule Questify.Games do
   """
 
   import Ecto.Query, warn: false
+  import Pgvector.Ecto.Query
+
   alias Questify.Repo
 
   alias Questify.Games.Quest
@@ -138,16 +140,17 @@ defmodule Questify.Games do
   def get_location!(id), do: Repo.get!(Location, id)
 
 
-  def get_location_action_options(location) do
-    location.actions
-      |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
-  end
+  # def get_location_action_options(location) do
+  #   location.actions
+  #     |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
+  # end
+
   def get_location_action_hint(location) do
-    action_options = get_location_action_options(location)
+    # action_options = get_location_action_options(location)
 
     action_description =
-      action_options
-      |> Enum.map(fn {ind, command, _id} -> "(#{ind}) #{command}. " end)
+      location.actions
+      |> Enum.map(fn action -> "#{action.command}, " end)
       |> Enum.join("\n ")
 
     action_description
@@ -249,6 +252,19 @@ defmodule Questify.Games do
   """
   def get_action!(id), do: Repo.get!(Action, id)
 
+  def get_action_by_text(location, text) do
+    embedding = Questify.Embeddings.embed!(text)
+    min_distance = 1.0
+
+    Repo.all(
+      from a in Action,
+        order_by: cosine_distance(a.embedding, ^embedding),
+        limit: 1,
+        where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
+        where: a.from_id == ^location.id
+    )
+  end
+
   @doc """
   Creates a action.
 
@@ -262,6 +278,9 @@ defmodule Questify.Games do
 
   """
   def create_action(attrs \\ %{}) do
+    embedding = Questify.Embeddings.embed!(attrs["command"])
+    attrs = Map.put(attrs, "embedding", embedding)
+
     %Action{}
     |> Action.changeset(attrs)
     |> Repo.insert()

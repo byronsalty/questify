@@ -11,7 +11,7 @@
         </div>
         <%= if @get_input == true do %>
           <form phx-submit="do_action">
-          <input id="command" name="command" type="text" class="command-input w-full mt-4" placeholder="Type your command..." autofocus autocomplete="off" />
+          <input id="command" name="command" type="text" class="command-input w-full mt-4" placeholder="What would you like to do..." autofocus autocomplete="off" />
           </form>
         <% end %>
         <%= if @output_description != nil do %>

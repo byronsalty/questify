@@ -20,6 +20,17 @@ if System.get_env("PHX_SERVER") do
   config :questify, QuestifyWeb.Endpoint, server: true
 end
 
+
+openai_api_key = System.get_env("OPENAI_API_KEY") ||
+  raise """
+  environment variable OPENAI_API_KEY is missing
+  """
+
+config :questify, :openai,
+  openai_api_key: openai_api_key,
+  embedding_url: "https://api.openai.com/v1/embeddings",
+  embedding_model: "text-embedding-ada-002"
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -52,6 +63,7 @@ if config_env() == :prod do
       environment variable SECRET_KEY_BASE is missing.
       You can generate one by calling: mix phx.gen.secret
       """
+
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")

@@ -10,20 +10,16 @@ defmodule QuestifyWeb.PlayLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => location_id}, _, socket) do
-    location = Games.get_location!(location_id) |> Repo.preload([:actions, :quest])
+  def handle_params(%{"id" => id}, _, socket) do
+    play = Games.get_play!(id)
+    location = Games.get_location!(play.location_id) |> Repo.preload([:actions, :quest])
 
-    action_options =
-      location.actions
-      |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
-
-    action_description =
-      action_options
-      |> Enum.map(fn {ind, command, _id} -> "(#{ind}) #{command}. " end)
-      |> Enum.join("\n ")
+    action_hint = Games.get_location_action_hint(location)
 
     {output_description, get_input, game_over} =
       if location.is_terminal == true do
+        Games.update_play(play, %{is_complete: true})
+
         {"Game Over", false, true}
       else
         {nil, true, false}
@@ -38,11 +34,13 @@ defmodule QuestifyWeb.PlayLive.Show do
 
     {:noreply,
      socket
+     |> assign(:play, play)
+     |> assign(:voted, false)
+     |> assign(:location, location)
      |> assign(:name, location.name)
      |> assign(:img_url, img_url)
      |> assign(:description, location.description)
-     |> assign(:action_options, action_options)
-     |> assign(:action_description, action_description)
+     |> assign(:action_description, action_hint)
      |> assign(:output_description, output_description)
      |> assign(:get_input, get_input)
      |> assign(:game_over, game_over)
@@ -53,7 +51,9 @@ defmodule QuestifyWeb.PlayLive.Show do
   def handle_event("do_action", %{"command" => value}, socket) do
     # Do something with the value
 
-    chosen = socket.assigns.action_options
+    action_options = Games.get_location_action_options(socket.assigns.location)
+
+    chosen = action_options
       |> Enum.filter(fn {ind, _, id} -> "#{ind}" == value end)
       |> Enum.map(fn {_, _, id} -> Games.get_action!(id) end)
 
@@ -76,11 +76,32 @@ defmodule QuestifyWeb.PlayLive.Show do
   end
 
   @impl true
+  def handle_event("up_vote", _, socket) do
+    # Do something with the value
+
+    Games.update_play(socket.assigns.play, %{rating: 1.0})
+
+    {:noreply, assign(socket, :voted, true)}
+  end
+
+  @impl true
+  def handle_event("down_vote", _, socket) do
+    # Do something with the value
+
+    Games.update_play(socket.assigns.play, %{rating: 0.0})
+
+    {:noreply, assign(socket, :voted, true)}
+  end
+
+
+  @impl true
   def handle_info({:move, to_id}, socket) do
 
     IO.inspect(to_id, label: "sending experience to new location")
 
-    {:noreply, push_patch(socket, to: ~p"/play/#{to_id}")}
+    Games.update_play(socket.assigns.play, %{location_id: to_id})
+
+    {:noreply, push_patch(socket, to: ~p"/play/#{socket.assigns.play}")}
   end
 
 

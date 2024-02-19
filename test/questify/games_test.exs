@@ -174,4 +174,60 @@ defmodule Questify.GamesTest do
       assert %Ecto.Changeset{} = Games.change_action(action)
     end
   end
+
+  describe "plays" do
+    alias Questify.Games.Play
+
+    import Questify.GamesFixtures
+
+    @invalid_attrs %{is_complete: nil, rating: nil}
+
+    test "list_plays/0 returns all plays" do
+      play = play_fixture()
+      assert Games.list_plays() == [play]
+    end
+
+    test "get_play!/1 returns the play with given id" do
+      play = play_fixture()
+      assert Games.get_play!(play.id) == play
+    end
+
+    test "create_play/1 with valid data creates a play" do
+      valid_attrs = %{is_complete: true, rating: 120.5}
+
+      assert {:ok, %Play{} = play} = Games.create_play(valid_attrs)
+      assert play.is_complete == true
+      assert play.rating == 120.5
+    end
+
+    test "create_play/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Games.create_play(@invalid_attrs)
+    end
+
+    test "update_play/2 with valid data updates the play" do
+      play = play_fixture()
+      update_attrs = %{is_complete: false, rating: 456.7}
+
+      assert {:ok, %Play{} = play} = Games.update_play(play, update_attrs)
+      assert play.is_complete == false
+      assert play.rating == 456.7
+    end
+
+    test "update_play/2 with invalid data returns error changeset" do
+      play = play_fixture()
+      assert {:error, %Ecto.Changeset{}} = Games.update_play(play, @invalid_attrs)
+      assert play == Games.get_play!(play.id)
+    end
+
+    test "delete_play/1 deletes the play" do
+      play = play_fixture()
+      assert {:ok, %Play{}} = Games.delete_play(play)
+      assert_raise Ecto.NoResultsError, fn -> Games.get_play!(play.id) end
+    end
+
+    test "change_play/1 returns a play changeset" do
+      play = play_fixture()
+      assert %Ecto.Changeset{} = Games.change_play(play)
+    end
+  end
 end

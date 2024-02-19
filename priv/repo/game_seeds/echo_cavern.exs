@@ -11,6 +11,7 @@ test_user = Accounts.get_user_by_email("test@test.com")
   "description" => """
   In the small, seemingly quiet town of Echo Ridge, nestled between dense forests and shadowy hills, lies the mysterious Echo Cavern. Legends speak of ancient treasures and unspeakable horrors lurking within its depths. Recently, a series of strange disappearances have reignited interest and fear of the cavern's rumored curse.
   """,
+  "rating" => 0.8,
   "creator_id" => test_user.id
 })
 

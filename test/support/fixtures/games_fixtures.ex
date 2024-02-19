@@ -90,4 +90,19 @@ defmodule Questify.GamesFixtures do
 
     action
   end
+
+  @doc """
+  Generate a play.
+  """
+  def play_fixture(attrs \\ %{}) do
+    {:ok, play} =
+      attrs
+      |> Enum.into(%{
+        is_complete: true,
+        rating: 120.5
+      })
+      |> Questify.Games.create_play()
+
+    play
+  end
 end

@@ -18,7 +18,9 @@ defmodule Questify.Games do
 
   """
   def list_quests do
-    Repo.all(Quest)
+    Quest
+    |> order_by(desc: :rating)
+    |> Repo.all()
   end
 
   @doc """
@@ -134,6 +136,22 @@ defmodule Questify.Games do
 
   """
   def get_location!(id), do: Repo.get!(Location, id)
+
+
+  def get_location_action_options(location) do
+    location.actions
+      |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
+  end
+  def get_location_action_hint(location) do
+    action_options = get_location_action_options(location)
+
+    action_description =
+      action_options
+      |> Enum.map(fn {ind, command, _id} -> "(#{ind}) #{command}. " end)
+      |> Enum.join("\n ")
+
+    action_description
+  end
 
   @doc """
   Creates a location.
@@ -294,5 +312,101 @@ defmodule Questify.Games do
   """
   def change_action(%Action{} = action, attrs \\ %{}) do
     Action.changeset(action, attrs)
+  end
+
+  alias Questify.Games.Play
+
+  @doc """
+  Returns the list of plays.
+
+  ## Examples
+
+      iex> list_plays()
+      [%Play{}, ...]
+
+  """
+  def list_plays do
+    Repo.all(Play)
+  end
+
+  @doc """
+  Gets a single play.
+
+  Raises `Ecto.NoResultsError` if the Play does not exist.
+
+  ## Examples
+
+      iex> get_play!(123)
+      %Play{}
+
+      iex> get_play!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_play!(id), do: Repo.get!(Play, id) |> Repo.preload([:quest, :location])
+
+  @doc """
+  Creates a play.
+
+  ## Examples
+
+      iex> create_play(%{field: value})
+      {:ok, %Play{}}
+
+      iex> create_play(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_play(attrs \\ %{}) do
+    %Play{}
+    |> Play.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a play.
+
+  ## Examples
+
+      iex> update_play(play, %{field: new_value})
+      {:ok, %Play{}}
+
+      iex> update_play(play, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_play(%Play{} = play, attrs) do
+    play
+    |> Play.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a play.
+
+  ## Examples
+
+      iex> delete_play(play)
+      {:ok, %Play{}}
+
+      iex> delete_play(play)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_play(%Play{} = play) do
+    Repo.delete(play)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking play changes.
+
+  ## Examples
+
+      iex> change_play(play)
+      %Ecto.Changeset{data: %Play{}}
+
+  """
+  def change_play(%Play{} = play, attrs \\ %{}) do
+    Play.changeset(play, attrs)
   end
 end

@@ -21,6 +21,12 @@ config :questify, QuestifyWeb.Endpoint,
   live_view: [signing_salt: "6eUx6aZE"]
 
 
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role],
+  region: "us-east-2",
+  s3_bucket: "quest-publish"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

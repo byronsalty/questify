@@ -22,7 +22,6 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:is_terminal]} type="checkbox" label="Terminal" />
         <.input field={@form[:description]} type="textarea" label="Description" />
-        <.input field={@form[:img_url]} type="text" label="Image URL" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Location</.button>
         </:actions>

@@ -96,7 +96,7 @@ defmodule QuestifyWeb.PlayLive.Show do
   @impl true
   def handle_info({:move, to_id}, socket) do
 
-    IO.inspect(to_id, label: "sending experience to new location")
+    # IO.inspect(to_id, label: "sending experience to new location")
 
     Games.update_play(socket.assigns.play, %{location_id: to_id})
 

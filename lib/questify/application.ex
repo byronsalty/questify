@@ -17,7 +17,8 @@ defmodule Questify.Application do
       # Start Finch
       {Finch, name: Questify.Finch},
       # Start the Endpoint (http/https)
-      QuestifyWeb.Endpoint
+      QuestifyWeb.Endpoint,
+      Questify.GenerationHandler
       # Start a worker by calling: Questify.Worker.start_link(arg)
       # {Questify.Worker, arg}
     ]

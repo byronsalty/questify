@@ -9,6 +9,7 @@ defmodule Questify.Games do
   alias Questify.Repo
 
   alias Questify.Games.Quest
+  alias Questify.GenerationHandler
 
   @doc """
   Returns the list of quests.
@@ -169,9 +170,28 @@ defmodule Questify.Games do
 
   """
   def create_location(attrs \\ %{}) do
-    %Location{}
-    |> Location.changeset(attrs)
-    |> Repo.insert()
+    case Repo.insert(Location.changeset(%Location{}, attrs)) do
+      {:ok, location} ->
+        hash = create_hash(location.description)
+        {url, file_name} = GenerationHandler.create_img_url(hash)
+
+        prompt = """
+        CONTEXT
+        Generate an image portraying the following scene for a retro adventure video game.
+        DESCRIPTION
+        #{location.description}
+        """
+
+        GenerationHandler.start_generating(file_name, prompt)
+
+        update_location(location, %{img_url: url})
+      other ->
+        other
+    end
+  end
+
+  defp create_hash(words) do
+    :crypto.hash(:md5, words) |> Base.encode16(case: :lower)
   end
 
   @doc """

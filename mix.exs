@@ -33,8 +33,10 @@ defmodule Questify.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.7"},
+      {:phoenix, "~> 1.7.9"},
       {:phoenix_ecto, "~> 4.4"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:pgvector, "~> 0.2.0"},

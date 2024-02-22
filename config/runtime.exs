@@ -29,7 +29,8 @@ openai_api_key = System.get_env("OPENAI_API_KEY") ||
 config :questify, :openai,
   openai_api_key: openai_api_key,
   embedding_url: "https://api.openai.com/v1/embeddings",
-  embedding_model: "text-embedding-ada-002"
+  embedding_model: "text-embedding-ada-002",
+  image_gen_url: "https://api.openai.com/v1/images/generations"
 
 if config_env() == :prod do
   database_url =

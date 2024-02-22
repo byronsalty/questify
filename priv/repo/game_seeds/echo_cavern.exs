@@ -15,6 +15,8 @@ test_user = Accounts.get_user_by_email("test@test.com")
   "creator_id" => test_user.id
 })
 
+Games.create_lore_action(echo)
+
 {:ok, house} = Games.create_location(%{
   "name" => "Alex's House",
   "description" => """

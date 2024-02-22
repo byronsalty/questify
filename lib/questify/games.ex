@@ -170,23 +170,28 @@ defmodule Questify.Games do
 
   """
   def create_location(attrs \\ %{}) do
-    case Repo.insert(Location.changeset(%Location{}, attrs)) do
-      {:ok, location} ->
-        hash = create_hash(location.description)
-        {url, file_name} = GenerationHandler.create_img_url(hash)
 
-        prompt = """
-        CONTEXT
-        Generate an image portraying the following scene for a retro adventure video game.
-        DESCRIPTION
-        #{location.description}
-        """
+    if attrs["img_url"] == nil do
+      case Repo.insert(Location.changeset(%Location{}, attrs)) do
+        {:ok, location} ->
+          hash = create_hash(location.description)
+          {url, file_name} = GenerationHandler.create_img_url(hash)
 
-        GenerationHandler.start_generating(file_name, prompt)
+          prompt = """
+          CONTEXT
+          Generate an image portraying the following scene for a retro adventure video game.
+          DESCRIPTION
+          #{location.description}
+          """
 
-        update_location(location, %{img_url: url})
-      other ->
-        other
+          GenerationHandler.start_generating(file_name, prompt)
+
+          update_location(location, %{img_url: url})
+        other ->
+          other
+      end
+    else
+      Repo.insert(Location.changeset(%Location{}, attrs))
     end
   end
 
@@ -295,13 +300,30 @@ defmodule Questify.Games do
     embedding = Questify.Embeddings.embed!(text)
     min_distance = 1.0
 
-    Repo.all(
+    chosen = Repo.all(
       from a in Action,
         order_by: cosine_distance(a.embedding, ^embedding),
         limit: 1,
         where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
-        where: a.from_id == ^location.id
+        where: a.from_id == ^location.id or is_nil(a.from_id)
     )
+
+    if Enum.count(chosen) > 0 and hd(chosen).description == "Replace with lore" do
+      chosen = hd(chosen)
+
+
+      lore_string = Questify.Lore.generate_lore_for_location(location, text)
+
+      chosen =
+        chosen
+        |> Map.put(:description, lore_string)
+        |> Map.put(:from_id, location.id)
+        |> Map.put(:to_id, location.id)
+
+      [chosen]
+    else
+      chosen
+    end
   end
 
   @doc """
@@ -323,6 +345,17 @@ defmodule Questify.Games do
     %Action{}
     |> Action.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def create_lore_action(quest) do
+    trigger = "Tell me more about a specific rumor or location."
+    description = "Replace with lore"
+
+    create_action(%{
+      "command" => trigger,
+      "description" => description,
+      "quest_id" => quest.id
+    })
   end
 
   @doc """

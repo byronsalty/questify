@@ -30,6 +30,8 @@ alias Questify.Games
   "creator_id" => test_user.id
 })
 
+Games.create_lore_action(hello_quest)
+
 {:ok, hello_location_lobby} = Games.create_location(%{
   "name" => "Lobby",
   "description" => """

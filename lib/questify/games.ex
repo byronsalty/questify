@@ -207,9 +207,28 @@ defmodule Questify.Games do
 
   """
   def update_location(%Location{} = location, attrs) do
-    location
-    |> Location.changeset(attrs)
-    |> Repo.update()
+    case Repo.update(Location.changeset(location, attrs)) do
+      {:ok, location} ->
+        hash = create_hash(location.description)
+        {url, file_name} = GenerationHandler.create_img_url(hash)
+
+        prompt = """
+        CONTEXT
+        Generate an image portraying the following scene for a retro adventure video game.
+        DESCRIPTION
+        #{location.description}
+        """
+
+        GenerationHandler.start_generating(file_name, prompt)
+
+        update_location_no_gen(location, %{img_url: url})
+      other ->
+        other
+    end
+  end
+
+  defp update_location_no_gen(%Location{} = location, attrs) do
+    Repo.update(Location.changeset(location, attrs))
   end
 
   @doc """

@@ -9,6 +9,8 @@ defmodule Questify.GenerationHandler do
 
   def start_generating(filename, prompt) do
     # create a post request to the server
+    IO.inspect(prompt, label: "starting generation for prompt")
+
     GenServer.cast(__MODULE__, {:generate, filename, prompt})
   end
 
@@ -22,30 +24,30 @@ defmodule Questify.GenerationHandler do
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
     endpoint = Application.get_env(:questify, :openai)[:image_gen_url]
 
-    {model, size} = {"dall-e-3", "1024x1024"}
-
-    data =
-      %{
-        "model" => model,
-        "size" => size,
-        "quality" => "standard",
-        "n" => 1,
-        "prompt" => prompt
-      }
-      |> Jason.encode!()
+    IO.inspect(prompt, label: "request to generate received")
 
     opts = [async: true, recv_timeout: 30_000, timeout: 30_000]
 
-    response =
-      HTTPoison.post!(
-        endpoint,
+    headers = [
+      {"Content-Type", "application/json"},
+      {"Authorization", "Bearer #{openai_api_key}"}
+    ]
+
+    data = Jason.encode!(%{
+        "model" => "dall-e-3",
+        "size" => "1024x1024",
+        "quality" => "standard",
+        "n" => 1,
+        "prompt" => prompt
+    })
+
+    response = HTTPoison.post!(
+        "https://api.openai.com/v1/images/generations",
         data,
-        [
-          {"Content-Type", "application/json"},
-          {"Authorization", "Bearer #{openai_api_key}"}
-        ],
-        opts
-      )
+        headers, opts
+    )
+
+    IO.inspect(response, label: "response")
 
     response_body =
       response
@@ -54,6 +56,7 @@ defmodule Questify.GenerationHandler do
 
     image_url = response_body |> get_in(["data", Access.at(0), "url"])
 
+    IO.inspect(image_url, label: "openai image_url")
 
 
     {:ok, file_response} = HTTPoison.get(image_url)

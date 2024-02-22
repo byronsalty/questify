@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for questify on 2024-02-18T04:12:08-06:00
+# fly.toml app configuration file generated for questifyv0 on 2024-02-22T00:05:35-06:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'questify'
+app = 'questifyv0'
 primary_region = 'ord'
 kill_signal = 'SIGTERM'
 
@@ -13,7 +13,7 @@ kill_signal = 'SIGTERM'
   release_command = '/app/bin/migrate'
 
 [env]
-  PHX_HOST = 'questify.fly.dev'
+  PHX_HOST = 'questifyv0.fly.dev'
   PORT = '8080'
 
 [http_service]

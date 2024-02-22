@@ -26,6 +26,37 @@ defmodule Questify.Lore do
     Questify.Text.get_completion(lore_prompt)
   end
 
+  def generate_rumor(quest) do
+
+    {:ok, gen} =
+      Instructor.chat_completion(
+        model: "gpt-3.5-turbo",
+        response_model: Questify.Lore.RumorGen,
+        max_retries: 3,
+        messages: [
+          %{
+            role: "user",
+            content: """
+            Your purpose is to create rumors to be spread throughout the game world.
+
+            Here is some information about the game world:
+            ```
+            #{quest.description}
+            ```
+            """
+          }
+        ]
+      )
+      |> IO.inspect(label: "rumor generation")
+
+    Questify.Lore.create_rumor(%{
+      "trigger" => gen.trigger,
+      "description" => gen.description,
+      "quest_id" => quest.id
+    })
+
+  end
+
   @doc """
   Returns the list of rumors.
 

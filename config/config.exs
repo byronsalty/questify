@@ -27,6 +27,13 @@ config :ex_aws,
   region: "us-east-2",
   s3_bucket: "quest-publish"
 
+config :instructor,
+  adapter: Instructor.Adapters.OpenAI
+
+config :openai,
+  api_key: [{:system, "OPENAI_API_KEY"}, :instance_role],
+  http_options: [recv_timeout: 10 * 60 * 1000]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

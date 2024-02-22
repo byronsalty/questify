@@ -60,7 +60,7 @@ defmodule QuestifyWeb.PlayLive.Show do
       if Enum.count(chosen) > 0 do
         chosen = hd(chosen)
 
-        send_move(chosen.to_id)
+        send_move(chosen)
 
         chosen.description
       else
@@ -104,12 +104,15 @@ defmodule QuestifyWeb.PlayLive.Show do
   end
 
 
-  defp send_move(to_id) do
+  defp send_move(chosen) do
+    to_id = chosen.to_id
+    description_delay = String.length(chosen.description) * 5
+
     pid = self()
 
     Task.start(fn ->
       # Wait half a second before adding the thinking to give a better UX
-      Process.sleep(3000)
+      Process.sleep(3000 + description_delay)
       send(pid, {:move, to_id})
     end)
   end

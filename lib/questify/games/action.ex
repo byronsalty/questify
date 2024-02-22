@@ -20,6 +20,6 @@ defmodule Questify.Games.Action do
   def changeset(action, attrs) do
     action
     |> cast(attrs, [:command, :description, :is_terminal, :quest_id, :from_id, :to_id, :embedding])
-    |> validate_required([:command, :description, :is_terminal, :quest_id, :from_id])
+    |> validate_required([:command, :description, :is_terminal, :quest_id])
   end
 end

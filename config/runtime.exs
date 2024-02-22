@@ -32,6 +32,10 @@ config :questify, :openai,
   embedding_model: "text-embedding-ada-002",
   image_gen_url: "https://api.openai.com/v1/images/generations"
 
+config :instructor,
+    adapter: Instructor.Adapters.OpenAI,
+    openai: [api_key: openai_api_key]
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

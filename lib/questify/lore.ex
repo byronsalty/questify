@@ -4,6 +4,7 @@ defmodule Questify.Lore do
   """
 
   import Ecto.Query, warn: false
+  import Pgvector.Ecto.Query
   alias Questify.Repo
 
   alias Questify.Lore.Rumor
@@ -24,6 +25,17 @@ defmodule Questify.Lore do
     """
 
     Questify.Text.get_completion(lore_prompt)
+  end
+
+
+  def get_related_lore(location, text) do
+    related_lore = get_lore_by_text(text)
+
+    if Enum.count(related_lore) > 0 do
+      generate_lore_for_location(location, hd(related_lore).description)
+    else
+      generate_lore_for_location(location, text)
+    end
   end
 
   def generate_rumor(quest) do
@@ -55,6 +67,18 @@ defmodule Questify.Lore do
       "quest_id" => quest.id
     })
 
+  end
+
+  def get_lore_by_text(text) do
+    embedding = Questify.Embeddings.embed!(text)
+    min_distance = 1.0
+
+    Repo.all(
+      from r in Rumor,
+        order_by: cosine_distance(r.embedding, ^embedding),
+        limit: 1,
+        where: cosine_distance(r.embedding, ^embedding) < ^min_distance
+    )
   end
 
   @doc """

@@ -6,8 +6,9 @@ You should not see this.
     module={QuestifyWeb.ActionLive.FormComponent}
     id={@action.id || :new}
     title={@page_title}
-    action={@live_action}
+    live_action={@live_action}
     action={@action}
+    locations={@locations}
     from_id={@from_id}
     patch={~p"/quests"}
   />

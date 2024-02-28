@@ -21,8 +21,10 @@ defmodule QuestifyWeb.ActionLive.FormComponent do
       >
         <.input field={@form[:from_id]} type="hidden" value={@from_id}/>
         <.input field={@form[:command]} type="text" label="Command" />
-        <.input field={@form[:description]} type="text" label="Description" />
-        <.input field={@form[:is_terminal]} type="checkbox" label="Is terminal" />
+        <.input field={@form[:description]} type="textarea" label="Description" />
+
+        <.input field={@form[:to_id]} type="select" options={@locations} />
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Action</.button>
         </:actions>
@@ -52,13 +54,17 @@ defmodule QuestifyWeb.ActionLive.FormComponent do
   end
 
   def handle_event("save", %{"action" => action_params}, socket) do
-    save_action(socket, socket.assigns.action, action_params)
+    save_action(socket, socket.assigns.live_action, action_params)
   end
 
   defp save_action(socket, :edit, action_params) do
+    IO.inspect(action_params, label: "action params on edit")
+
     case Games.update_action(socket.assigns.action, action_params) do
       {:ok, action} ->
         notify_parent({:saved, action})
+
+        IO.inspect(socket.assigns.patch, label: "patch on edit")
 
         {:noreply,
          socket

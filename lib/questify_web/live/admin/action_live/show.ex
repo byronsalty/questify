@@ -13,10 +13,16 @@ defmodule QuestifyWeb.ActionLive.Show do
   def handle_params(%{"id" => id}, _, socket) do
     action = Games.get_action!(id) |> Repo.preload([:from])
 
+    quest = Games.get_quest!(action.quest_id) |> Repo.preload(:locations)
+    locations = quest.locations |> Enum.map(&{&1.name, &1.id})
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:action, action)}
+     |> assign(:action, action)
+     |> assign(:from_id, action.from_id)
+     |> assign(:locations, locations)}
+
   end
 
   defp page_title(:show), do: "Show Action"

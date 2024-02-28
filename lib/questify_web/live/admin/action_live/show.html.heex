@@ -21,7 +21,9 @@
     module={QuestifyWeb.ActionLive.FormComponent}
     id={@action.id}
     title={@page_title}
-    action={@live_action}
+    live_action={@live_action}
+    locations={@locations}
+    from_id={@from_id}
     action={@action}
     patch={~p"/actions/#{@action}"}
   />

@@ -21,7 +21,7 @@ defmodule QuestifyWeb.QuestLive.FormComponent do
       >
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:slug]} type="text" label="Slug" />
-        <.input field={@form[:description]} type="text" label="Description" />
+        <.input field={@form[:description]} type="textarea" label="Description" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Quest</.button>
         </:actions>

@@ -9,7 +9,11 @@ defmodule QuestifyWeb.QuestLive.Index do
   def mount(_params, session, socket) do
     socket = assign_current_user(socket, session)
 
-    {:ok, stream(socket, :quests, Games.list_quests())}
+    IO.inspect(socket.assigns.current_user, label: "current_user")
+
+    quests = Games.list_quests_by_user(socket.assigns.current_user)
+
+    {:ok, stream(socket, :quests, quests)}
   end
 
   @impl true

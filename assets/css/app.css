@@ -5,7 +5,14 @@
 /* This file is for your main application CSS */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+
+html {
+  height: 100%;
+  overflow: hidden; /* Prevents scrolling on the entire page */
+}
 body {
+  height: 100%;
+  overflow: hidden; /* Prevents scrolling on the entire page */
   font-family: 'Press Start 2P', cursive;
 }
 @font-face {
@@ -62,8 +69,24 @@ body {
 }
 
 /* Custom styles for the container */
-.arcade-links {
-  background-color: #000000; /* Black background */
+.arcade-links {  
+  overflow-y: auto; /* Enables vertical scrolling within the element */
+  max-height: 40vh; /* Adjust based on your layout needs */
   padding: 1em;
-  display: inline-block; /* Or 'block', depending on your layout */
+  display: block;
+}
+
+/* Styles for the scrollbar track */
+.arcade-links::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Light background for the track */
+}
+
+/* Styles for the scrollbar handle */
+.arcade-links::-webkit-scrollbar-thumb {
+  background-color: #dcb439; /* A gold color to match your link color */
+  border-radius: 4px; /* Rounded corners for the handle */
+}
+
+.arcade-links::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
 }

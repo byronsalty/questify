@@ -19,6 +19,7 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:quest_id]} type="hidden" value={@quest.id} />
+        <.input field={@form[:img_url]} type="hidden" />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:is_terminal]} type="checkbox" label="Terminal" />
         <.input field={@form[:description]} type="textarea" label="Description" />

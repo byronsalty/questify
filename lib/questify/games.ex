@@ -177,6 +177,7 @@ defmodule Questify.Games do
 
   """
   def create_location(attrs \\ %{}) do
+    attrs = add_location_embedding(attrs)
 
     if attrs["img_url"] == nil do
       case Repo.insert(Location.changeset(%Location{}, attrs)) do
@@ -219,28 +220,45 @@ defmodule Questify.Games do
 
   """
   def update_location(%Location{} = location, attrs) do
-    case Repo.update(Location.changeset(location, attrs)) do
-      {:ok, location} ->
-        hash = create_hash(location.description)
-        {url, file_name} = GenerationHandler.create_img_url(hash)
+    attrs = add_location_embedding(attrs)
 
-        prompt = """
-        CONTEXT
-        Generate an image portraying the following scene for a retro adventure video game.
-        DESCRIPTION
-        #{location.description}
-        """
+    if attrs["img_url"] == nil do
+      case Repo.update(Location.changeset(location, attrs)) do
+        {:ok, location} ->
+          hash = create_hash(location.description)
+          {url, file_name} = GenerationHandler.create_img_url(hash)
 
-        GenerationHandler.start_generating(file_name, prompt)
+          prompt = """
+          CONTEXT
+          Generate an image portraying the following scene for a retro adventure video game.
+          DESCRIPTION
+          #{location.description}
+          """
 
-        update_location_no_gen(location, %{img_url: url})
-      other ->
-        other
+          GenerationHandler.start_generating(file_name, prompt)
+
+          update_location_no_gen(location, %{img_url: url})
+        other ->
+          other
+      end
+    else
+      update_location_no_gen(location, attrs)
     end
   end
 
   defp update_location_no_gen(%Location{} = location, attrs) do
     Repo.update(Location.changeset(location, attrs))
+  end
+
+  defp add_location_embedding(attrs) do
+    location_text = """
+    Name: #{attrs["name"]}
+    Description:
+    #{attrs["description"]}
+    """
+
+    embedding = Questify.Embeddings.embed!(location_text)
+    Map.put(attrs, "embedding", embedding)
   end
 
   @doc """
@@ -316,15 +334,25 @@ defmodule Questify.Games do
         where: a.from_id == ^location.id or is_nil(a.from_id)
     )
 
+    # Inspecting cosine distance
     Enum.each(chosen, fn action ->
       IO.inspect(action.command, label: "action command")
       IO.inspect(action.min_distance, label: "min distance")
     end)
 
-    if Enum.count(chosen) > 0 and hd(chosen).description == "Replace with lore" do
-      chosen = hd(chosen)
+    if Enum.count(chosen) > 0 and hd(chosen).from_id == nil do
+      handle_special_actions(location, text, chosen)
+    else
+      chosen
+    end
+  end
 
-      lore_string = Questify.Lore.generate_lore_by_location(location, text)
+  def handle_special_actions(location, text, chosen) do
+    chosen = hd(chosen)
+    if chosen.description == "Replace with lore" do
+
+      # lore_string = Questify.Lore.generate_lore_by_location(location, text)
+      lore_string = Questify.Lore.get_related_lore(location, text)
 
       chosen =
         chosen
@@ -334,7 +362,8 @@ defmodule Questify.Games do
 
       [chosen]
     else
-      chosen
+      # No other special forms yet
+      [chosen]
     end
   end
 

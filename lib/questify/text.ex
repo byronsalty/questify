@@ -5,39 +5,47 @@ defmodule Questify.Text do
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
     openai_completion_url = "https://api.openai.com/v1/chat/completions"
 
-    data =
-      %{
-        messages: [
-          %{
-            role: "user",
-            content: text
-          }
-        ],
-        model: text_model,
-        temperature: 0.7
-      }
-      |> Jason.encode!()
+    # Setup the request data
+    request_data = setup_request_data(text_model, text)
 
-    IO.inspect(data, label: "request data")
+    # Make the request, get the response
+    do_post(openai_completion_url, request_data, openai_api_key)
+  end
 
+  defp setup_request_data(text_model, text) do
+    %{
+      messages: [
+        %{
+          role: "user",
+          content: text
+        }
+      ],
+      model: text_model,
+      temperature: 0.7
+    }
+    |> Jason.encode!()
+  end
+
+  @doc """
+  I'm wrapping this function to simplify the calling function for instructional purposes.
+  """
+  defp do_post(url, request_data, openai_api_key) do
     opts = [recv_timeout: 30_000, timeout: 30_000]
 
     response_body =
       HTTPoison.post!(
-        openai_completion_url,
-        data,
+        url,
+        request_data,
         [
           {"Content-Type", "application/json"},
           {"Authorization", "Bearer #{openai_api_key}"}
         ],
         opts
       )
-      |> IO.inspect(label: "request_body")
       |> Map.get(:body)
       |> Jason.decode!()
 
     response_body
-    |> IO.inspect(label: "response_body")
     |> Map.get("choices")
     |> hd()
     |> Map.get("message")

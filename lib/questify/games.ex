@@ -309,16 +309,22 @@ defmodule Questify.Games do
 
     chosen = Repo.all(
       from a in Action,
+        select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
         order_by: cosine_distance(a.embedding, ^embedding),
         limit: 1,
         where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
         where: a.from_id == ^location.id or is_nil(a.from_id)
     )
 
+    Enum.each(chosen, fn action ->
+      IO.inspect(action.command, label: "action command")
+      IO.inspect(action.min_distance, label: "min distance")
+    end)
+
     if Enum.count(chosen) > 0 and hd(chosen).description == "Replace with lore" do
       chosen = hd(chosen)
 
-      lore_string = Questify.Lore.generate_lore_for_location(location, text)
+      lore_string = Questify.Lore.generate_lore_by_location(location, text)
 
       chosen =
         chosen

@@ -20,7 +20,9 @@
           <div class="game-description">
             <p><%= @output_description %></p>
           </div>
-          <.button phx-click="continue" class="text-yellow-400">_Continue_</.button>
+          <%= if @game_over == false do %>
+            <.button phx-click="continue" class="text-yellow-400">_Continue_</.button>
+          <% end %>
         <% end %>
         <%= if @game_over == true do %>
           <div class="my-8">

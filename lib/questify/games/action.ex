@@ -8,6 +8,7 @@ defmodule Questify.Games.Action do
     field :is_terminal, :boolean, default: false
 
     field :embedding, Pgvector.Ecto.Vector
+    field :min_distance, :float, virtual: true
 
     belongs_to :quest, Questify.Games.Quest
     belongs_to :from, Questify.Games.Location, foreign_key: :from_id

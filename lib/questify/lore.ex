@@ -9,7 +9,7 @@ defmodule Questify.Lore do
 
   alias Questify.Lore.Rumor
 
-  def generate_lore_for_location(location, text) do
+  def generate_lore_by_location(location, text) do
     description = """
     GAME:
     #{location.quest.name}
@@ -32,9 +32,9 @@ defmodule Questify.Lore do
     related_lore = get_lore_by_text(text)
 
     if Enum.count(related_lore) > 0 do
-      generate_lore_for_location(location, hd(related_lore).description)
+      generate_lore_by_location(location, hd(related_lore).description)
     else
-      generate_lore_for_location(location, text)
+      generate_lore_by_location(location, text)
     end
   end
 

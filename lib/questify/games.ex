@@ -318,7 +318,6 @@ defmodule Questify.Games do
     if Enum.count(chosen) > 0 and hd(chosen).description == "Replace with lore" do
       chosen = hd(chosen)
 
-
       lore_string = Questify.Lore.generate_lore_for_location(location, text)
 
       chosen =

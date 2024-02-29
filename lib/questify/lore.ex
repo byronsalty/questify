@@ -29,15 +29,15 @@ defmodule Questify.Lore do
   end
 
 
-  def get_related_lore(location, text) do
-    related_lore = get_lore_by_text(text)
+  def get_related_lore(location, user_input) do
+    related_lore = get_lore_by_text(user_input)
 
     if Enum.count(related_lore) > 0 do
       IO.puts("Found related lore")
       generate_lore_from_text(location, hd(related_lore).description)
     else
       IO.puts("Did not find lore")
-      generate_lore_from_text(location.quest, text)
+      generate_lore_from_text(location.quest, user_input)
     end
   end
 

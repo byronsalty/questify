@@ -26,6 +26,13 @@ defmodule Questify.Games do
     |> Repo.all()
   end
 
+  def list_quests_by_user(user) do
+    Quest
+    |> where([q], q.creator_id == ^user.id)
+    |> order_by(desc: :rating)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single quest.
 

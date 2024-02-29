@@ -56,7 +56,7 @@ defmodule QuestifyWeb.Router do
   ## Authentication routes
 
   scope "/", QuestifyWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through [:browser, :user, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{QuestifyWeb.UserAuth, :redirect_if_user_is_authenticated}] do

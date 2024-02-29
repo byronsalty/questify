@@ -6,13 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 
-html {
-  height: 100%;
-  overflow: hidden; /* Prevents scrolling on the entire page */
-}
 body {
-  height: 100%;
-  overflow: hidden; /* Prevents scrolling on the entire page */
   font-family: 'Press Start 2P', cursive;
 }
 @font-face {

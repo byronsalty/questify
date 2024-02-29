@@ -8,19 +8,20 @@ defmodule Questify.Lore do
   alias Questify.Repo
 
   alias Questify.Lore.Rumor
+  alias Questify.Games.Location
 
-  def generate_lore_by_location(location, text) do
+  def generate_lore_from_text(quest, text) do
     description = """
     GAME:
-    #{location.quest.name}
-    #{location.quest.description}
+    #{quest.name}
+    #{quest.description}
     """
 
     lore_prompt = """
     CONTEXT:
     #{description}
 
-    Please give a one paragraph statement about some lore of per the user's request:
+    Please give a short one sentence statement about some lore regarding:
     #{text}
     """
 
@@ -32,9 +33,11 @@ defmodule Questify.Lore do
     related_lore = get_lore_by_text(text)
 
     if Enum.count(related_lore) > 0 do
-      generate_lore_by_location(location, hd(related_lore).description)
+      IO.puts("Found related lore")
+      generate_lore_from_text(location, hd(related_lore).description)
     else
-      generate_lore_by_location(location, text)
+      IO.puts("Did not find lore")
+      generate_lore_from_text(location.quest, text)
     end
   end
 
@@ -71,13 +74,13 @@ defmodule Questify.Lore do
 
   def get_lore_by_text(text) do
     embedding = Questify.Embeddings.embed!(text)
-    min_distance = 1.0
+    min_distance = 0.20
 
     Repo.all(
-      from r in Rumor,
-        order_by: cosine_distance(r.embedding, ^embedding),
+      from l in Location,
+        order_by: cosine_distance(l.embedding, ^embedding),
         limit: 1,
-        where: cosine_distance(r.embedding, ^embedding) < ^min_distance
+        where: cosine_distance(l.embedding, ^embedding) < ^min_distance
     )
   end
 

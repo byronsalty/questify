@@ -56,22 +56,33 @@ defmodule QuestifyWeb.PlayLive.Show do
 
     chosen = Games.get_action_by_text(location, value)
 
-    action_output =
+    {action_output, to_id} =
       if Enum.count(chosen) > 0 do
         chosen = hd(chosen)
 
-        send_move(chosen)
+        # send_move(chosen)
 
-        chosen.description
+
+        {chosen.description, chosen.to_id}
       else
-        "Try something else"
+        {"Try something else", location.id}
       end
 
     {:noreply,
      socket
      |> assign(:output_description, action_output)
+     |> assign(:to_id, to_id)
      |> assign(:get_input, false)
     }
+  end
+
+  @impl true
+  def handle_event("continue", _, socket) do
+    # Do something with the value
+
+    Games.update_play(socket.assigns.play, %{rating: 1.0})
+
+    handle_info({:move, socket.assigns.to_id}, socket)
   end
 
   @impl true

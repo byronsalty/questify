@@ -5,19 +5,22 @@
         <img src={@img_url} alt={"#{@name} Image"} class="game-image">
       </div>
       <div class="md:w-1/2 md:pl-6">
-        <div class="game-description">
-          <p><%= @description %></p>
-          <p class="my-4"><%= @action_description %></p>
-        </div>
-        <%= if @get_input == true do %>
-          <form phx-submit="do_action">
-          <input id="command" name="command" type="text" class="command-input w-full mt-4" placeholder="What would you like to do..." autofocus autocomplete="off" />
-          </form>
+        <%= if @output_description == nil do %>
+          <div class="game-description">
+            <p><%= @description %></p>
+            <p class="my-4"><%= @action_description %></p>
+          </div>
+          <%= if @get_input == true do %>
+            <form phx-submit="do_action">
+            <input id="command" name="command" type="text" class="command-input w-full mt-4" placeholder="What would you like to do..." autofocus autocomplete="off" />
+            </form>
+          <% end %>
         <% end %>
         <%= if @output_description != nil do %>
           <div class="game-description">
             <p><%= @output_description %></p>
           </div>
+          <.button phx-click="continue" class="text-yellow-400">_Continue_</.button>
         <% end %>
         <%= if @game_over == true do %>
           <div class="my-8">

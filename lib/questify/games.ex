@@ -148,6 +148,19 @@ defmodule Questify.Games do
   def get_location!(id), do: Repo.get!(Location, id)
 
 
+  def get_location_by_text(quest, text) do
+    embedding = Questify.Embeddings.embed!(text)
+    min_distance = 1.0
+
+    Repo.all(
+      from l in Location,
+        order_by: cosine_distance(l.embedding, ^embedding),
+        limit: 1,
+        where: cosine_distance(l.embedding, ^embedding) < ^min_distance,
+        where: l.quest_id == ^quest.id
+    )
+  end
+
   # def get_location_action_options(location) do
   #   location.actions
   #     |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
@@ -179,27 +192,23 @@ defmodule Questify.Games do
   def create_location(attrs \\ %{}) do
     attrs = add_location_embedding(attrs)
 
-    if attrs["img_url"] == nil do
-      case Repo.insert(Location.changeset(%Location{}, attrs)) do
-        {:ok, location} ->
-          hash = create_hash(location.description)
-          {url, file_name} = GenerationHandler.create_img_url(hash)
+    case Repo.insert(Location.changeset(%Location{}, attrs)) do
+      {:ok, location} ->
+        hash = create_hash(location.description)
+        {url, file_name} = GenerationHandler.create_img_url(hash)
 
-          prompt = """
-          CONTEXT
-          Generate an image portraying the following scene for a retro adventure video game.
-          DESCRIPTION
-          #{location.description}
-          """
+        prompt = """
+        CONTEXT
+        Generate an image portraying the following scene for a retro adventure video game.
+        DESCRIPTION
+        #{location.description}
+        """
 
-          GenerationHandler.start_generating(file_name, prompt)
+        GenerationHandler.start_generating(file_name, prompt)
 
-          update_location(location, %{img_url: url})
-        other ->
-          other
-      end
-    else
-      Repo.insert(Location.changeset(%Location{}, attrs))
+        update_location_no_gen(location, %{img_url: url})
+      other ->
+        other
     end
   end
 
@@ -349,21 +358,23 @@ defmodule Questify.Games do
 
   def handle_special_actions(location, text, chosen) do
     chosen = hd(chosen)
-    if chosen.description == "Replace with lore" do
+    case chosen.description do
+      "Replace with action" ->
+        {:ok, action} = Questify.AgentHandler.generate_action(location, text)
 
-      # lore_string = Questify.Lore.generate_lore_by_location(location, text)
-      lore_string = Questify.Lore.get_related_lore(location, text)
+        [action]
 
-      chosen =
-        chosen
-        |> Map.put(:description, lore_string)
-        |> Map.put(:from_id, location.id)
-        |> Map.put(:to_id, location.id)
+      "Replace with lore" ->
+        lore_string = Questify.Lore.get_related_lore(location, text)
+        chosen =
+          chosen
+          |> Map.put(:description, lore_string)
+          |> Map.put(:from_id, location.id)
+          |> Map.put(:to_id, location.id)
+        [chosen]
 
-      [chosen]
-    else
-      # No other special forms yet
-      [chosen]
+      _ ->
+        [chosen]
     end
   end
 
@@ -391,6 +402,16 @@ defmodule Questify.Games do
   def create_lore_action(quest) do
     trigger = "Tell me more about a specific rumor or location."
     description = "Replace with lore"
+
+    create_action(%{
+      "command" => trigger,
+      "description" => description,
+      "quest_id" => quest.id
+    })
+  end
+  def create_trailblaze_action(quest) do
+    trigger = "Create a path to a location."
+    description = "Replace with action"
 
     create_action(%{
       "command" => trigger,

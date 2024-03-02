@@ -31,6 +31,7 @@ alias Questify.Games
 })
 
 Games.create_lore_action(hello_quest)
+Games.create_trailblaze_action(hello_quest)
 
 {:ok, hello_location_lobby} = Games.create_location(%{
   "name" => "Lobby",

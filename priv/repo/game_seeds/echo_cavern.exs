@@ -16,6 +16,7 @@ test_user = Accounts.get_user_by_email("test@test.com")
 })
 
 Games.create_lore_action(echo)
+Games.create_trailblaze_action(echo)
 
 {:ok, house} = Games.create_location(%{
   "name" => "Alex's House",

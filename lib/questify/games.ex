@@ -204,7 +204,7 @@ defmodule Questify.Games do
         #{location.description}
         """
 
-        GenerationHandler.start_generating(file_name, prompt)
+        GenerationHandler.generate_image(hash, file_name, prompt)
 
         update_location_no_gen(location, %{img_url: url})
       other ->

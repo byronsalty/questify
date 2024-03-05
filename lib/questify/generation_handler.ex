@@ -3,15 +3,17 @@ defmodule Questify.GenerationHandler do
 
   alias ExAws.S3
 
+  @topic "generations"
+
   def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def start_generating(filename, prompt) do
+  def generate_image(hash, filename, prompt) do
     # create a post request to the server
     IO.inspect(prompt, label: "starting generation for prompt")
 
-    GenServer.cast(__MODULE__, {:generate, filename, prompt})
+    GenServer.cast(__MODULE__, {:generate_image, hash, filename, prompt})
   end
 
   @impl true
@@ -20,7 +22,7 @@ defmodule Questify.GenerationHandler do
   end
 
   @impl true
-  def handle_cast({:generate, file_name, prompt}, _state) do
+  def handle_cast({:generate, hash, file_name, prompt}, _state) do
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
     endpoint = Application.get_env(:questify, :openai)[:image_gen_url]
 
@@ -75,6 +77,14 @@ defmodule Questify.GenerationHandler do
     url = "https://d8g32g7q3zoxw.cloudfront.net/#{file_name}"
 
     {url, file_name}
+  end
+
+  def broadcast_complete(hash) do
+    Phoenix.PubSub.broadcast!(Questify.PubSub, @topic, %Phoenix.Socket.Broadcast{
+      topic: @topic,
+      event: "image_complete",
+      payload: {:image_complete, hash}
+    })
   end
 
   def test_gen() do

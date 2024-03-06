@@ -28,7 +28,7 @@ defmodule QuestifyWeb.Router do
     get "/view/:slug", PageController, :view
     get "/start/:slug", PageController, :start
 
-    live "/play/:id", PlayLive.Show, :show
+    live "/play/:id", PlayLive.Play, :play
   end
 
   # Other scopes may use custom stacks.
@@ -72,13 +72,10 @@ defmodule QuestifyWeb.Router do
   scope "/", QuestifyWeb do
     pipe_through [:browser, :user, :require_authenticated_user]
 
-
-
     live_session :require_authenticated_user,
       on_mount: [{QuestifyWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-
 
       live "/quests", QuestLive.Index, :index
       live "/quests/new", QuestLive.Index, :new

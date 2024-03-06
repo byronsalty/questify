@@ -1,5 +1,4 @@
 defmodule Questify.Embeddings do
-
   def embed(text, opts \\ []) when is_binary(text) do
     embedding_url = Application.get_env(:questify, :openai)[:embedding_url]
     embedding_model = Application.get_env(:questify, :openai)[:embedding_model]

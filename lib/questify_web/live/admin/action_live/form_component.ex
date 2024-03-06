@@ -19,7 +19,7 @@ defmodule QuestifyWeb.ActionLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:from_id]} type="hidden" value={@from_id}/>
+        <.input field={@form[:from_id]} type="hidden" value={@from_id} />
         <.input field={@form[:command]} type="text" label="Command" />
         <.input field={@form[:description]} type="textarea" label="Description" />
 

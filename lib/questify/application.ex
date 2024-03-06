@@ -18,7 +18,8 @@ defmodule Questify.Application do
       {Finch, name: Questify.Finch},
       # Start the Endpoint (http/https)
       QuestifyWeb.Endpoint,
-      Questify.GenerationHandler
+      Questify.ImageHandler,
+      Questify.TextHandler
       # Start a worker by calling: Questify.Worker.start_link(arg)
       # {Questify.Worker, arg}
     ]

@@ -16,7 +16,12 @@
 
 <.back navigate={~p"/locations/#{@action.from}"}>Back to Location</.back>
 
-<.modal :if={@live_action == :edit} id="action-modal" show on_cancel={JS.patch(~p"/actions/#{@action}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="action-modal"
+  show
+  on_cancel={JS.patch(~p"/actions/#{@action}")}
+>
   <.live_component
     module={QuestifyWeb.ActionLive.FormComponent}
     id={@action.id}

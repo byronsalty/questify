@@ -20,7 +20,6 @@ config :questify, QuestifyWeb.Endpoint,
   pubsub_server: Questify.PubSub,
   live_view: [signing_salt: "6eUx6aZE"]
 
-
 config :ex_aws,
   access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
   secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role],
@@ -72,7 +71,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
 
 config :questify, Questify.Repo, types: Questify.PostgrexTypes
 

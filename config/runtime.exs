@@ -20,11 +20,11 @@ if System.get_env("PHX_SERVER") do
   config :questify, QuestifyWeb.Endpoint, server: true
 end
 
-
-openai_api_key = System.get_env("OPENAI_API_KEY") ||
-  raise """
-  environment variable OPENAI_API_KEY is missing
-  """
+openai_api_key =
+  System.get_env("OPENAI_API_KEY") ||
+    raise """
+    environment variable OPENAI_API_KEY is missing
+    """
 
 config :questify, :openai,
   openai_api_key: openai_api_key,
@@ -33,8 +33,8 @@ config :questify, :openai,
   image_gen_url: "https://api.openai.com/v1/images/generations"
 
 config :instructor,
-    adapter: Instructor.Adapters.OpenAI,
-    openai: [api_key: openai_api_key]
+  adapter: Instructor.Adapters.OpenAI,
+  openai: [api_key: openai_api_key]
 
 if config_env() == :prod do
   database_url =
@@ -44,7 +44,7 @@ if config_env() == :prod do
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  #maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+  # maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
   maybe_ipv6 = []
 
   config :questify, Questify.Repo,
@@ -53,7 +53,7 @@ if config_env() == :prod do
     socket_options: maybe_ipv6,
     ssl: true,
     ssl_opts: [
-      server_name_indication: 'ep-tiny-pine-a5ub39yy.us-east-2.aws.neon.tech',
+      server_name_indication: ~c"ep-tiny-pine-a5ub39yy.us-east-2.aws.neon.tech",
       verify: :verify_none
     ]
 
@@ -68,7 +68,6 @@ if config_env() == :prod do
       environment variable SECRET_KEY_BASE is missing.
       You can generate one by calling: mix phx.gen.secret
       """
-
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")

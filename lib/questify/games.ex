@@ -9,7 +9,7 @@ defmodule Questify.Games do
   alias Questify.Repo
 
   alias Questify.Games.Quest
-  alias Questify.GenerationHandler
+  alias Questify.ImageHandler
 
   @doc """
   Returns the list of quests.
@@ -147,7 +147,6 @@ defmodule Questify.Games do
   """
   def get_location!(id), do: Repo.get!(Location, id)
 
-
   def get_location_by_text(quest, text) do
     embedding = Questify.Embeddings.embed!(text)
     min_distance = 1.0
@@ -195,7 +194,7 @@ defmodule Questify.Games do
     case Repo.insert(Location.changeset(%Location{}, attrs)) do
       {:ok, location} ->
         hash = create_hash(location.description)
-        {url, file_name} = GenerationHandler.create_img_url(hash)
+        {url, file_name} = ImageHandler.create_img_url(hash)
 
         prompt = """
         CONTEXT
@@ -204,9 +203,10 @@ defmodule Questify.Games do
         #{location.description}
         """
 
-        GenerationHandler.start_generating(file_name, prompt)
+        ImageHandler.generate_image(hash, file_name, prompt)
 
         update_location_no_gen(location, %{img_url: url})
+
       other ->
         other
     end
@@ -247,6 +247,7 @@ defmodule Questify.Games do
           GenerationHandler.start_generating(file_name, prompt)
 
           update_location_no_gen(location, %{img_url: url})
+
         other ->
           other
       end
@@ -332,16 +333,17 @@ defmodule Questify.Games do
 
   def get_action_by_text(location, text) do
     embedding = Questify.Embeddings.embed!(text)
-    min_distance = 1.0
+    min_distance = 0.5
 
-    chosen = Repo.all(
-      from a in Action,
-        select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
-        order_by: cosine_distance(a.embedding, ^embedding),
-        limit: 1,
-        where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
-        where: a.from_id == ^location.id or is_nil(a.from_id)
-    )
+    chosen =
+      Repo.all(
+        from a in Action,
+          select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
+          order_by: cosine_distance(a.embedding, ^embedding),
+          limit: 1,
+          where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
+          where: a.from_id == ^location.id or is_nil(a.from_id)
+      )
 
     # Inspecting cosine distance
     Enum.each(chosen, fn action ->
@@ -349,34 +351,43 @@ defmodule Questify.Games do
       IO.inspect(action.min_distance, label: "min distance")
     end)
 
-    if Enum.count(chosen) > 0 and hd(chosen).from_id == nil do
-      handle_special_actions(location, text, chosen)
-    else
-      chosen
-    end
+    # if Enum.count(chosen) > 0 and hd(chosen).from_id == nil do
+    #   handle_special_actions(location, text, chosen)
+    # else
+    #   chosen
+    # end
+
+    chosen
   end
 
-  def handle_special_actions(location, text, chosen) do
-    chosen = hd(chosen)
-    case chosen.description do
-      "Replace with action" ->
-        {:ok, action} = Questify.AgentHandler.generate_action(location, text)
+  # def handle_special_actions(location, text, chosen) do
+  #   chosen = hd(chosen)
+  #   case chosen.description do
+  #     "Replace with action" ->
+  #       {:ok, action} = Questify.AgentHandler.generate_action(location, text)
 
-        [action]
+  #       [action]
 
-      "Replace with lore" ->
-        lore_string = Questify.Lore.get_related_lore(location, text)
-        chosen =
-          chosen
-          |> Map.put(:description, lore_string)
-          |> Map.put(:from_id, location.id)
-          |> Map.put(:to_id, location.id)
-        [chosen]
+  #     "Replace with lore" ->
+  #       # lore_string = Questify.Lore.get_related_lore(location, text)
+  #       hash = :crypto.hash(:md5, text) |> Base.encode16(case: :lower)
+  #       lore_prompt = Questify.Lore.generate_lore_prompt(location.quest, text)
+  #       lore_string = "Yes... I can tell you about that..."
 
-      _ ->
-        [chosen]
-    end
-  end
+  #       Questify.TextHandler.stream_completion(hash, lore_prompt)
+
+  #       chosen =
+  #         chosen
+  #         |> Map.put(:description, lore_string)
+  #         |> Map.put(:from_id, location.id)
+  #         |> Map.put(:to_id, location.id)
+  #         |> Map.put(:hash, hash)
+  #       [chosen]
+
+  #     _ ->
+  #       [chosen]
+  #   end
+  # end
 
   @doc """
   Creates a action.
@@ -409,6 +420,7 @@ defmodule Questify.Games do
       "quest_id" => quest.id
     })
   end
+
   def create_trailblaze_action(quest) do
     trigger = "Create a path to a location."
     description = "Replace with action"

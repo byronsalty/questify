@@ -31,7 +31,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="quest-modal" show on_cancel={JS.patch(~p"/quests")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="quest-modal"
+  show
+  on_cancel={JS.patch(~p"/quests")}
+>
   <.live_component
     module={QuestifyWeb.QuestLive.FormComponent}
     id={@quest.id || :new}

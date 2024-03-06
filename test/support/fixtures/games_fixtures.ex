@@ -8,7 +8,6 @@ defmodule Questify.GamesFixtures do
   Generate a quest.
   """
   def quest_fixture(attrs \\ %{}) do
-
     attrs =
       if Map.has_key?(attrs, :creator_id) do
         attrs
@@ -16,7 +15,6 @@ defmodule Questify.GamesFixtures do
         user = Questify.AccountsFixtures.user_fixture()
         Map.put(attrs, :creator_id, user.id)
       end
-
 
     {:ok, quest} =
       attrs
@@ -30,12 +28,10 @@ defmodule Questify.GamesFixtures do
     quest
   end
 
-
   @doc """
   Generate a location.
   """
   def location_fixture(attrs \\ %{}) do
-
     attrs =
       if Map.has_key?(attrs, :quest_id) do
         attrs
@@ -43,7 +39,6 @@ defmodule Questify.GamesFixtures do
         quest = quest_fixture()
         Map.put(attrs, :quest_id, quest.id)
       end
-
 
     {:ok, location} =
       attrs
@@ -60,7 +55,6 @@ defmodule Questify.GamesFixtures do
   Generate a action.
   """
   def action_fixture(attrs \\ %{}) do
-
     attrs =
       if Map.has_key?(attrs, :quest_id) do
         attrs
@@ -77,7 +71,6 @@ defmodule Questify.GamesFixtures do
         location = location_fixture(%{quest_id: quest_id})
         Map.put(attrs, :from_id, location.id)
       end
-
 
     {:ok, action} =
       attrs

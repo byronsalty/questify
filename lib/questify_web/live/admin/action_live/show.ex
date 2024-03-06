@@ -22,7 +22,6 @@ defmodule QuestifyWeb.ActionLive.Show do
      |> assign(:action, action)
      |> assign(:from_id, action.from_id)
      |> assign(:locations, locations)}
-
   end
 
   defp page_title(:show), do: "Show Action"

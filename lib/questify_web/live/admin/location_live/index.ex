@@ -28,7 +28,6 @@ defmodule QuestifyWeb.LocationLive.Index do
   defp apply_action(socket, :new, %{"quest_id" => quest_id}) do
     quest = Questify.Games.get_quest!(quest_id)
 
-
     socket
     |> assign(:quest, quest)
     |> assign(:page_title, "New Location")

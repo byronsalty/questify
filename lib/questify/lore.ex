@@ -10,7 +10,7 @@ defmodule Questify.Lore do
   alias Questify.Lore.Rumor
   alias Questify.Games.Location
 
-  def generate_lore_from_text(quest, text) do
+  def generate_lore_prompt(quest, text) do
     description = """
     GAME:
     #{quest.name}
@@ -21,13 +21,18 @@ defmodule Questify.Lore do
     CONTEXT:
     #{description}
 
-    Please give a short one sentence statement about some lore regarding:
+    Please give a one paragraph statement about some lore regarding:
     #{text}
     """
 
-    Questify.Text.get_completion(lore_prompt)
+    lore_prompt
   end
 
+  def generate_lore_from_text(quest, text) do
+    lore_prompt = generate_lore_prompt(quest, text)
+
+    Questify.Text.get_completion(lore_prompt)
+  end
 
   def get_related_lore(location, user_input) do
     related_lore = get_lore_by_text(user_input)
@@ -42,7 +47,6 @@ defmodule Questify.Lore do
   end
 
   def generate_rumor(quest) do
-
     {:ok, gen} =
       Instructor.chat_completion(
         model: "gpt-3.5-turbo",
@@ -69,7 +73,6 @@ defmodule Questify.Lore do
       "description" => gen.description,
       "quest_id" => quest.id
     })
-
   end
 
   def get_lore_by_text(text) do
@@ -126,7 +129,7 @@ defmodule Questify.Lore do
 
   """
   def create_rumor(attrs \\ %{}) do
-    #TODO change this order to all changeset to catch issues before embedding
+    # TODO change this order to all changeset to catch issues before embedding
     embedding = Questify.Embeddings.embed!(attrs["trigger"])
     attrs = Map.put(attrs, "embedding", embedding)
 
@@ -148,7 +151,7 @@ defmodule Questify.Lore do
 
   """
   def update_rumor(%Rumor{} = rumor, attrs) do
-    #TODO change this order to all changeset to catch issues before embedding
+    # TODO change this order to all changeset to catch issues before embedding
     embedding = Questify.Embeddings.embed!(attrs["trigger"])
     attrs = Map.put(attrs, "embedding", embedding)
 

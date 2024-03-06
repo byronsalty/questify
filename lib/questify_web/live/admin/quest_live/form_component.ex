@@ -57,7 +57,7 @@ defmodule QuestifyWeb.QuestLive.FormComponent do
   defp save_quest(socket, :edit, quest_params) do
     current_user = socket.assigns.current_user
 
-    #TODO check that user matches creator
+    # TODO check that user matches creator
 
     case Games.update_quest(socket.assigns.quest, quest_params) do
       {:ok, quest} ->

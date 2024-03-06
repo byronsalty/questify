@@ -9,7 +9,6 @@ defmodule Questify.AgentHandler do
     # create a post request to the server
 
     generate_action(from_location, text)
-
   end
 
   @impl true
@@ -20,7 +19,6 @@ defmodule Questify.AgentHandler do
   # @impl true
   # def handle_cast({:blaze, from_id, text}, _state) do
   #   openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
-
 
   #   {:noreply, nil}
   # end
@@ -74,7 +72,5 @@ defmodule Questify.AgentHandler do
       "command" => gen.command,
       "description" => gen.description
     })
-
   end
-
 end

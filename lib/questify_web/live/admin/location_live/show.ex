@@ -4,13 +4,10 @@ defmodule QuestifyWeb.LocationLive.Show do
   alias Questify.Games
   alias Questify.Repo
 
-
   @topic "generations"
 
   @impl true
   def mount(_params, _session, socket) do
-
-
     QuestifyWeb.Endpoint.subscribe(@topic)
 
     {:ok, socket}
@@ -31,20 +28,18 @@ defmodule QuestifyWeb.LocationLive.Show do
 
   @impl true
   def handle_info(
-    %Phoenix.Socket.Broadcast{
-      topic: @topic,
-      event: "image_complete",
-      payload: _
-    },
-    socket
-    ) do
-
-    location = Games.get_location!(socket.assigns.location.id)
+        %Phoenix.Socket.Broadcast{
+          topic: @topic,
+          event: "image_complete",
+          payload: _
+        },
+        socket
+      ) do
+    location =
+      Games.get_location!(socket.assigns.location.id)
       |> Repo.preload([:actions, :quest])
 
-    {:noreply,
-      socket
-      |> assign(:location, location)}
+    {:noreply, assign(socket, :location, location)}
   end
 
   defp page_title(:show), do: "Show Location"

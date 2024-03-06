@@ -27,7 +27,6 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
           <.button phx-disable-with="Saving...">Save Location</.button>
         </:actions>
       </.simple_form>
-
     </div>
     """
   end

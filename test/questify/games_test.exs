@@ -35,7 +35,12 @@ defmodule Questify.GamesTest do
 
     test "update_quest/2 with valid data updates the quest" do
       quest = quest_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        slug: "some updated slug"
+      }
 
       assert {:ok, %Quest{} = quest} = Games.update_quest(quest, update_attrs)
       assert quest.name == "some updated name"
@@ -149,7 +154,12 @@ defmodule Questify.GamesTest do
 
     test "update_action/2 with valid data updates the action" do
       action = action_fixture()
-      update_attrs = %{command: "some updated command", description: "some updated description", is_terminal: false}
+
+      update_attrs = %{
+        command: "some updated command",
+        description: "some updated description",
+        is_terminal: false
+      }
 
       assert {:ok, %Action{} = action} = Games.update_action(action, update_attrs)
       assert action.command == "some updated command"

@@ -4,11 +4,14 @@ defmodule QuestifyWeb.ActionLiveTest do
   import Phoenix.LiveViewTest
   import Questify.GamesFixtures
 
-
   setup :register_and_log_in_user
 
   @create_attrs %{command: "some command", description: "some description", is_terminal: true}
-  @update_attrs %{command: "some updated command", description: "some updated description", is_terminal: false}
+  @update_attrs %{
+    command: "some updated command",
+    description: "some updated description",
+    is_terminal: false
+  }
   @invalid_attrs %{command: nil, description: nil, is_terminal: false}
 
   defp create_action(_) do

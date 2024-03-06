@@ -28,7 +28,6 @@ defmodule QuestifyWeb.ActionLive.Index do
   end
 
   defp apply_action(socket, :new, %{"location_id" => from_id}) do
-
     from = Games.get_location!(from_id)
 
     quest = Games.get_quest!(from.quest_id) |> Repo.preload(:locations)

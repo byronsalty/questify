@@ -1,4 +1,4 @@
-defmodule Questify.GenerationHandler do
+defmodule Questify.ImageHandler do
   use GenServer
 
   alias ExAws.S3
@@ -22,7 +22,7 @@ defmodule Questify.GenerationHandler do
   end
 
   @impl true
-  def handle_cast({:generate, hash, file_name, prompt}, _state) do
+  def handle_cast({:generate_image, hash, file_name, prompt}, _state) do
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
     endpoint = Application.get_env(:questify, :openai)[:image_gen_url]
 
@@ -35,19 +35,22 @@ defmodule Questify.GenerationHandler do
       {"Authorization", "Bearer #{openai_api_key}"}
     ]
 
-    data = Jason.encode!(%{
+    data =
+      Jason.encode!(%{
         "model" => "dall-e-3",
         "size" => "1024x1024",
         "quality" => "standard",
         "n" => 1,
         "prompt" => prompt
-    })
+      })
 
-    response = HTTPoison.post!(
-        "https://api.openai.com/v1/images/generations",
+    response =
+      HTTPoison.post!(
+        endpoint,
         data,
-        headers, opts
-    )
+        headers,
+        opts
+      )
 
     IO.inspect(response, label: "response")
 
@@ -60,14 +63,13 @@ defmodule Questify.GenerationHandler do
 
     IO.inspect(image_url, label: "openai image_url")
 
-
     {:ok, file_response} = HTTPoison.get(image_url)
-
 
     write_file_to_s3(file_name, file_response.body, "image/png")
     |> IO.inspect(label: "write_file_to_s3")
 
     # TODO: broadcast that file is ready on s3
+    broadcast_complete(hash)
 
     {:noreply, nil}
   end

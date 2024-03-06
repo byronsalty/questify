@@ -79,13 +79,8 @@ defmodule Questify.TextHandler do
   end
 
   defp stream_next(hash) do
-    IO.puts("instream next")
-
     receive do
       chunk = %HTTPoison.AsyncChunk{} ->
-        # Here you could decode JSON or handle the chunk directly
-        IO.puts("Received chunk: #{inspect(chunk)}")
-
         data =
           chunk.chunk
           |> String.split("\n")
@@ -116,12 +111,7 @@ defmodule Questify.TextHandler do
         IO.puts("Done streaming.")
 
       # Match against other messages you might expect, e.g., timeouts or errors
-      other ->
-        IO.inspect(other, label: "other in stream_next")
-
-        # json_chunk = Jason.decode!(other)
-        # IO.inspect(json_chunk, label: "json chunk")
-        # data =
+      _other ->
         stream_next(hash)
     end
   end
@@ -140,7 +130,6 @@ defmodule Questify.TextHandler do
         |> Map.get("content")
       end)
       |> Enum.join("")
-      |> IO.inspect(label: "chunks text joined")
 
     broadcast_chunk(hash, text)
 

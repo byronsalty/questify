@@ -133,7 +133,6 @@ defmodule QuestifyWeb.PlayLive.Play do
         },
         socket
       ) do
-    IO.inspect({hash, text}, label: "text update received")
 
     if socket.assigns.hash == hash do
       updated_output = socket.assigns.output_description <> text
@@ -169,7 +168,7 @@ defmodule QuestifyWeb.PlayLive.Play do
         },
         socket
       ) do
-    IO.inspect("event: #{event_type}, payload: #{payload}", label: "un handled broadcast")
+    IO.inspect("event: #{event_type}, payload: #{payload}", label: "unhandled broadcast")
 
     {:noreply, socket}
   end

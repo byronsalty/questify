@@ -9,11 +9,11 @@ defmodule Questify.ImageHandler do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def generate_image(hash, filename, prompt) do
+  def generate_image(location_id, hash, filename, prompt) do
     # create a post request to the server
     IO.inspect(prompt, label: "starting generation for prompt")
 
-    GenServer.cast(__MODULE__, {:generate_image, hash, filename, prompt})
+    GenServer.cast(__MODULE__, {:generate_image, location_id, hash, filename, prompt})
   end
 
   @impl true
@@ -22,7 +22,7 @@ defmodule Questify.ImageHandler do
   end
 
   @impl true
-  def handle_cast({:generate_image, hash, file_name, prompt}, _state) do
+  def handle_cast({:generate_image, location_id, hash, file_name, prompt}, _state) do
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
     endpoint = Application.get_env(:questify, :openai)[:image_gen_url]
 
@@ -65,6 +65,13 @@ defmodule Questify.ImageHandler do
 
     write_file_to_s3(file_name, file_response.body, "image/png")
     |> IO.inspect(label: "write_file_to_s3")
+
+    location = Questify.Games.get_location!(location_id)
+    {cdn_url, _} = create_img_url(hash)
+
+    Questify.Games.update_location_no_gen(location, %{
+      "img_url" => cdn_url
+    })
 
     #broadcast that file is ready on s3
     broadcast_complete(hash)

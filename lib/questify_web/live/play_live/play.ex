@@ -168,9 +168,10 @@ defmodule QuestifyWeb.PlayLive.Play do
     socket
     ) do
 
-    rand = :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
-    new_img_url = "#{socket.assigns.img_url}?#{rand}"
-    {:noreply, assign(socket, :img_url, new_img_url)}
+    location =
+      Games.get_location!(socket.assigns.location.id)
+
+    {:noreply, assign(socket, :img_url, location.img_url)}
   end
 
   @impl true

@@ -199,7 +199,7 @@ defmodule Questify.Games do
       {:ok, location} ->
         if is_nil(location.img_url) do
           hash = create_hash(location.description)
-          {url, filename} = ImageHandler.create_img_url(hash)
+          {_url, filename} = ImageHandler.create_img_url(hash)
 
           prompt = """
           CONTEXT
@@ -208,12 +208,12 @@ defmodule Questify.Games do
           #{location.description}
           """
 
-          ImageHandler.generate_image(hash, filename, prompt)
+          ImageHandler.generate_image(location.id, hash, filename, prompt)
 
           IO.inspect(location, label: "going to add img url")
 
-          update_location_no_gen(location, %{img_url: url})
-          |> IO.inspect(label: "updated location")
+          # update_location_no_gen(location, %{img_url: url})
+          # |> IO.inspect(label: "updated location")
         end
 
         IO.inspect(location, label: "location after if in create")
@@ -257,9 +257,9 @@ defmodule Questify.Games do
           #{location.description}
           """
 
-          ImageHandler.generate_image(hash, filename, prompt)
+          ImageHandler.generate_image(location.id, hash, filename, prompt)
 
-          update_location_no_gen(location, %{img_url: url})
+          # update_location_no_gen(location, %{img_url: url})
         end
 
       other ->
@@ -267,7 +267,7 @@ defmodule Questify.Games do
     end
   end
 
-  defp update_location_no_gen(%Location{} = location, attrs) do
+  def update_location_no_gen(%Location{} = location, attrs) do
     Repo.update(Location.changeset(location, attrs))
   end
 

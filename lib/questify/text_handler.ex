@@ -8,6 +8,11 @@ defmodule Questify.TextHandler do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
+  @impl true
+  def init(_) do
+    {:ok, nil}
+  end
+
   def get_completion(text) do
     text_model = "gpt-3.5-turbo"
     openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
@@ -151,9 +156,7 @@ defmodule Questify.TextHandler do
     |> Jason.encode!()
   end
 
-  @doc """
-  I'm wrapping this function to simplify the calling function for instructional purposes.
-  """
+  # I'm wrapping this function to simplify the calling function for instructional purposes.
   defp do_post(url, request_data, openai_api_key) do
     opts = [recv_timeout: 30_000, timeout: 30_000]
 

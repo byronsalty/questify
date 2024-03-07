@@ -69,7 +69,7 @@ defmodule Questify.ImageHandler do
     |> IO.inspect(label: "write_file_to_s3")
 
     # TODO: broadcast that file is ready on s3
-    broadcast_complete(hash)
+    # broadcast_complete(hash)
 
     {:noreply, nil}
   end

@@ -1,4 +1,4 @@
-defmodule Questify.Games.ActionGen do
+defmodule Questify.Creator.ActionGen do
   use Ecto.Schema
   use Instructor.Validator
   import Ecto.Changeset

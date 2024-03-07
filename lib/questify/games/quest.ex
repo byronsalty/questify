@@ -10,6 +10,7 @@ defmodule Questify.Games.Quest do
     field :rating, :float, default: 0.0
 
     belongs_to :creator, Questify.Accounts.User, foreign_key: :creator_id
+    belongs_to :theme, Questify.Creator.Theme
     has_many :locations, Questify.Games.Location
 
     timestamps()
@@ -18,7 +19,7 @@ defmodule Questify.Games.Quest do
   @doc false
   def changeset(quest, attrs) do
     quest
-    |> cast(attrs, [:name, :slug, :rating, :description, :img_url, :creator_id])
+    |> cast(attrs, [:name, :slug, :rating, :description, :img_url, :creator_id, :theme_id])
     |> validate_required([:name, :slug, :description, :creator_id])
     |> unique_constraint(:slug)
   end

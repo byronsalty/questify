@@ -61,15 +61,13 @@ defmodule Questify.ImageHandler do
 
     image_url = response_body |> get_in(["data", Access.at(0), "url"])
 
-    IO.inspect(image_url, label: "openai image_url")
-
     {:ok, file_response} = HTTPoison.get(image_url)
 
     write_file_to_s3(file_name, file_response.body, "image/png")
     |> IO.inspect(label: "write_file_to_s3")
 
-    # TODO: broadcast that file is ready on s3
-    # broadcast_complete(hash)
+    #broadcast that file is ready on s3
+    broadcast_complete(hash)
 
     {:noreply, nil}
   end

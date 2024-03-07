@@ -210,8 +210,13 @@ defmodule Questify.Games do
 
           ImageHandler.generate_image(hash, filename, prompt)
 
+          IO.inspect(location, label: "going to add img url")
+
           update_location_no_gen(location, %{img_url: url})
+          |> IO.inspect(label: "updated location")
         end
+
+        IO.inspect(location, label: "location after if in create")
 
         {:ok, location}
       other ->
@@ -267,6 +272,8 @@ defmodule Questify.Games do
   end
 
   defp add_location_embedding(attrs) do
+    IO.inspect(attrs, label: "attrs before location embedding")
+
     location_text = "#{attrs["name"]}"
 
     embedding = Questify.Embeddings.embed!(location_text)
@@ -389,14 +396,20 @@ defmodule Questify.Games do
   end
 
   def create_trailblaze_action(quest) do
-    trigger = "Create a path to a location."
+    triggers = [
+      "Create a path to a location.",
+      "Move to a location.",
+      "Go to a location."
+    ]
     description = "Replace with action"
 
-    create_action(%{
-      "command" => trigger,
-      "description" => description,
-      "quest_id" => quest.id
-    })
+    Enum.each(triggers, fn trigger ->
+      create_action(%{
+        "command" => trigger,
+        "description" => description,
+        "quest_id" => quest.id
+      })
+    end)
   end
 
   @doc """

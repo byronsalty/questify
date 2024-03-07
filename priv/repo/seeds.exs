@@ -172,4 +172,4 @@ Games.create_location(%{
 })
 
 
-# Code.eval_file("priv/repo/game_seeds/echo_cavern.exs")
+Code.eval_file("priv/repo/game_seeds/echo_cavern.exs")

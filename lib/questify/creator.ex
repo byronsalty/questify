@@ -27,7 +27,8 @@ defmodule Questify.Creator do
   end
 
   def generate_location_data(quest, name_text) do
-    related_chunks = get_theme_chunks(quest.theme, name_text)
+    theme = get_theme!(quest.theme_id)
+    related_chunks = get_theme_chunks(theme, name_text)
 
     rag_text =
       related_chunks
@@ -42,19 +43,26 @@ defmodule Questify.Creator do
         max_retries: 3,
         messages: [
           %{
-            role: "user",
+            role: "system",
             content: """
             Your purpose is to create a Location in the current quest.
 
             CONTEXT FOR STYLE:
             ```
             #{rag_text}
+            #{quest.description}
             ```
 
             Derive the name of this Location from this user input:
             ```
             #{name_text}
             ```
+            """
+          },
+          %{
+            role: "user",
+            content: """
+            Provide the name and short description for this location.
             """
           }
         ]
@@ -65,64 +73,66 @@ defmodule Questify.Creator do
 
   def generate_location(quest, name_text) do
     gen = generate_location_data(quest, name_text)
+      |> IO.inspect(label: "location generation")
 
-    Questify.Games.create_location(%{
+
+    {:ok, location} = Questify.Games.create_location(%{
       "quest_id" => quest.id,
       "name" => gen.name,
       "description" => gen.description
     })
+    location
   end
 
-  # def generate_action(quest, text) do
-  #   quest = from_location.quest
+  def generate_path_to_location(quest, from_location, name_text) do
+    to_location = get_or_generate_location(quest, name_text)
 
-  #   [to_location | _] = Questify.Games.get_location_by_text(quest, text)
+    generate_action(quest, from_location, to_location)
+  end
 
-  #   {:ok, gen} =
-  #     Instructor.chat_completion(
-  #       model: "gpt-3.5-turbo",
-  #       response_model: Questify.Games.ActionGen,
-  #       max_retries: 2,
-  #       messages: [
-  #         %{
-  #           role: "user",
-  #           content: """
-  #           Your purpose is to create a new action that moves a person from their current location
-  #           to the new location that they are describing.
+  def generate_action(quest, from_location, to_location) do
 
-  #           Here is some information about the game world:
-  #           ```
-  #           #{quest.description}
-  #           ```
+    {:ok, gen} =
+      Instructor.chat_completion(
+        model: "gpt-3.5-turbo",
+        response_model: Questify.Creator.ActionGen,
+        max_retries: 2,
+        messages: [
+          %{
+            role: "user",
+            content: """
+            Your purpose is to create a new action that moves a person from one location to another.
 
-  #           The user is moving from this location:
-  #           ```
-  #           #{from_location.name} #{from_location.description}
-  #           ```
+            Here is some information about the game world:
+            ```
+            #{quest.description}
+            ```
 
-  #           to this location:
-  #           ```
-  #           #{to_location.name} #{to_location.description}
-  #           ```
+            The user is moving from this location:
+            ```
+            #{from_location.name} #{from_location.description}
+            ```
 
-  #           This is how the user requested the action:
-  #           ```
-  #           #{text}
-  #           ```
-  #           """
-  #         }
-  #       ]
-  #     )
-  #     |> IO.inspect(label: "location generation")
+            to this location:
+            ```
+            #{to_location.name} #{to_location.description}
+            ```
 
-  #   Questify.Games.create_action(%{
-  #     "quest_id" => quest.id,
-  #     "from_id" => from_location.id,
-  #     "to_id" => to_location.id,
-  #     "command" => gen.command,
-  #     "description" => gen.description
-  #   })
-  # end
+            Provide a command and a description for this action.
+            """
+          }
+        ]
+      )
+      |> IO.inspect(label: "action generation")
+
+    Questify.Games.create_action(%{
+      "quest_id" => quest.id,
+      "from_id" => from_location.id,
+      "to_id" => to_location.id,
+      "command" => gen.command,
+      "description" => gen.description
+    })
+  end
 
   @doc """
   Returns the list of themes.
@@ -242,16 +252,11 @@ defmodule Questify.Creator do
   def chunk_file(theme, file_path) do
     File.stream!(file_path)
     |> Stream.filter(fn ln ->
-      letter_count =
-        String.replace(ln, ~r/\W/, "")
-        |> String.length()
-
-      letter_count >= 10
+      String.replace(ln, ~r/\W/, "")|> String.length() >= 10
     end)
     |> Stream.chunk_every(30)
     |> Stream.each(fn lines ->
       block = Enum.join(lines, "")
-      # IO.puts(block)
       create_chunk(%{
         "theme_id" => theme.id,
         "body" => block

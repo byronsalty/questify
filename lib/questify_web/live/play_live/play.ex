@@ -159,6 +159,21 @@ defmodule QuestifyWeb.PlayLive.Play do
     end
   end
 
+  def handle_info(
+    %Phoenix.Socket.Broadcast{
+      topic: @topic,
+      event: "image_complete",
+      payload: _
+    },
+    socket
+    ) do
+
+    location =
+      Games.get_location!(socket.assigns.location.id)
+
+    {:noreply, assign(socket, :img_url, location.img_url)}
+  end
+
   @impl true
   def handle_info(
         %Phoenix.Socket.Broadcast{
@@ -172,13 +187,32 @@ defmodule QuestifyWeb.PlayLive.Play do
 
     {:noreply, socket}
   end
+    def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: @topic,
+          event: "image_complete",
+          payload: _
+        },
+        socket
+      ) do
+    location =
+      Games.get_location!(socket.assigns.location.id)
+      |> Repo.preload([:actions, :quest])
+
+    {:noreply, assign(socket, :location, location)}
+  end
 
   defp do_special(socket, location, action, text) do
     case action.description do
       "Replace with action" ->
-        {:ok, action} = Questify.AgentHandler.generate_action(location, text)
+        {:ok, action} = Questify.Creator.generate_path_to_location(location.quest, location, text)
 
-        [action]
+        IO.inspect(action, label: "generated action")
+
+        socket
+        |> assign(:output_description, action.description)
+        |> assign(:to_id, action.to_id)
+        |> assign(:get_input, false)
 
       "Replace with lore" ->
         # lore_string = Questify.Lore.get_related_lore(location, text)

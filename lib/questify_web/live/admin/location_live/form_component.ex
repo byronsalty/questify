@@ -66,7 +66,7 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Location updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -74,6 +74,13 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
   end
 
   defp save_location(socket, :new, location_params) do
+    quest = Games.get_quest!(location_params["quest_id"])
+    gen = Questify.Creator.generate_location_data(quest, location_params["name"])
+    location_params =
+      location_params
+      |> Map.put("name", gen.name)
+      |> Map.put("description", gen.description)
+
     case Games.create_location(location_params) do
       {:ok, location} ->
         notify_parent({:saved, location})
@@ -81,7 +88,7 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Location created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}

@@ -47,10 +47,14 @@ defmodule Questify.Games do
       ** (Ecto.NoResultsError)
 
   """
-  def get_quest!(id), do: Repo.get!(Quest, id)
+  def get_quest!(id), do: Repo.get!(Quest, id) |> Repo.preload([:locations, :theme])
 
-  def get_quest_by_slug!(slug), do: Repo.get_by!(Quest, slug: slug) |> Repo.preload([:locations])
+  def get_quest_by_slug!(slug), do: Repo.get_by!(Quest, slug: slug) |> Repo.preload([:locations, :theme])
 
+  @spec create_quest(
+          :invalid
+          | %{optional(:__struct__) => none(), optional(atom() | binary()) => any()}
+        ) :: any()
   @doc """
   Creates a quest.
 
@@ -149,7 +153,7 @@ defmodule Questify.Games do
 
   def get_location_by_text(quest, text) do
     embedding = Questify.Embeddings.embed!(text)
-    min_distance = 1.0
+    min_distance = 0.15
 
     Repo.all(
       from l in Location,
@@ -193,20 +197,23 @@ defmodule Questify.Games do
 
     case Repo.insert(Location.changeset(%Location{}, attrs)) do
       {:ok, location} ->
-        hash = create_hash(location.description)
-        {url, file_name} = ImageHandler.create_img_url(hash)
+        if is_nil(location.img_url) do
+          hash = create_hash(location.description)
+          {url, filename} = ImageHandler.create_img_url(hash)
 
-        prompt = """
-        CONTEXT
-        Generate an image portraying the following scene for a retro adventure video game.
-        DESCRIPTION
-        #{location.description}
-        """
+          prompt = """
+          CONTEXT
+          Generate an image portraying the following scene for a retro adventure video game.
+          DESCRIPTION
+          #{location.description}
+          """
 
-        ImageHandler.generate_image(hash, file_name, prompt)
+          ImageHandler.generate_image(hash, filename, prompt)
 
-        update_location_no_gen(location, %{img_url: url})
+          update_location_no_gen(location, %{img_url: url})
+        end
 
+        {:ok, location}
       other ->
         other
     end
@@ -231,11 +238,12 @@ defmodule Questify.Games do
   def update_location(%Location{} = location, attrs) do
     attrs = add_location_embedding(attrs)
 
-    if attrs["img_url"] == nil do
-      case Repo.update(Location.changeset(location, attrs)) do
-        {:ok, location} ->
-          hash = create_hash(location.description)
-          {url, file_name} = GenerationHandler.create_img_url(hash)
+    case Repo.update(Location.changeset(location, attrs)) do
+      {:ok, location} ->
+        hash = create_hash(location.description)
+        {url, filename} = ImageHandler.create_img_url(hash)
+
+        if location.img_url != url do
 
           prompt = """
           CONTEXT
@@ -244,15 +252,13 @@ defmodule Questify.Games do
           #{location.description}
           """
 
-          GenerationHandler.start_generating(file_name, prompt)
+          ImageHandler.generate_image(hash, filename, prompt)
 
           update_location_no_gen(location, %{img_url: url})
+        end
 
-        other ->
-          other
-      end
-    else
-      update_location_no_gen(location, attrs)
+      other ->
+        other
     end
   end
 
@@ -261,11 +267,7 @@ defmodule Questify.Games do
   end
 
   defp add_location_embedding(attrs) do
-    location_text = """
-    Name: #{attrs["name"]}
-    Description:
-    #{attrs["description"]}
-    """
+    location_text = "#{attrs["name"]}"
 
     embedding = Questify.Embeddings.embed!(location_text)
     Map.put(attrs, "embedding", embedding)
@@ -351,43 +353,8 @@ defmodule Questify.Games do
       IO.inspect(action.min_distance, label: "min distance")
     end)
 
-    # if Enum.count(chosen) > 0 and hd(chosen).from_id == nil do
-    #   handle_special_actions(location, text, chosen)
-    # else
-    #   chosen
-    # end
-
     chosen
   end
-
-  # def handle_special_actions(location, text, chosen) do
-  #   chosen = hd(chosen)
-  #   case chosen.description do
-  #     "Replace with action" ->
-  #       {:ok, action} = Questify.AgentHandler.generate_action(location, text)
-
-  #       [action]
-
-  #     "Replace with lore" ->
-  #       # lore_string = Questify.Lore.get_related_lore(location, text)
-  #       hash = :crypto.hash(:md5, text) |> Base.encode16(case: :lower)
-  #       lore_prompt = Questify.Lore.generate_lore_prompt(location.quest, text)
-  #       lore_string = "Yes... I can tell you about that..."
-
-  #       Questify.TextHandler.stream_completion(hash, lore_prompt)
-
-  #       chosen =
-  #         chosen
-  #         |> Map.put(:description, lore_string)
-  #         |> Map.put(:from_id, location.id)
-  #         |> Map.put(:to_id, location.id)
-  #         |> Map.put(:hash, hash)
-  #       [chosen]
-
-  #     _ ->
-  #       [chosen]
-  #   end
-  # end
 
   @doc """
   Creates a action.

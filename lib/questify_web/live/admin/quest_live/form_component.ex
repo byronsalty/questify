@@ -55,7 +55,7 @@ defmodule QuestifyWeb.QuestLive.FormComponent do
   end
 
   defp save_quest(socket, :edit, quest_params) do
-    current_user = socket.assigns.current_user
+    # current_user = socket.assigns.current_user
 
     # TODO check that user matches creator
 

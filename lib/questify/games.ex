@@ -343,22 +343,44 @@ defmodule Questify.Games do
   def get_action_by_text(location, text) do
     embedding = Questify.Embeddings.embed!(text)
     min_distance = 0.5
+    quest_id = location.quest_id
 
-    chosen =
+    IO.puts("\n=== Action Similarity Search ===")
+    IO.puts("User input: #{text}")
+    IO.puts("Location: #{location.name}")
+    IO.puts("Quest ID: #{quest_id}")
+
+    # First get all actions with their distances
+    all_actions =
       Repo.all(
         from a in Action,
           select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
-          order_by: cosine_distance(a.embedding, ^embedding),
-          limit: 1,
-          where: cosine_distance(a.embedding, ^embedding) < ^min_distance,
-          where: a.from_id == ^location.id or is_nil(a.from_id)
+          where: a.from_id == ^location.id or is_nil(a.from_id),
+          where: a.quest_id == ^quest_id,
+          order_by: cosine_distance(a.embedding, ^embedding)
       )
 
-    # Inspecting cosine distance
-    Enum.each(chosen, fn action ->
-      IO.inspect(action.command, label: "action command")
-      IO.inspect(action.min_distance, label: "min distance")
+    # Log all actions and their distances
+    IO.puts("\nAll available actions and their cosine distances:")
+    Enum.each(all_actions, fn action ->
+      IO.puts("Command: #{action.command}")
+      IO.puts("Distance: #{Float.round(action.min_distance, 4)}")
+      IO.puts("Available from: #{if action.from_id, do: "this location only", else: "anywhere"}")
+      IO.puts("---")
     end)
+
+    # Filter for chosen actions
+    chosen = Enum.filter(all_actions, & &1.min_distance < min_distance)
+
+    IO.puts("\nChosen actions (distance < #{min_distance}):")
+    if Enum.empty?(chosen) do
+      IO.puts("No actions found within minimum distance threshold")
+    else
+      Enum.each(chosen, fn action ->
+        IO.puts("Selected: #{action.command} (distance: #{Float.round(action.min_distance, 4)})")
+      end)
+    end
+    IO.puts("================================\n")
 
     chosen
   end

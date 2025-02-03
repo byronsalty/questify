@@ -41,6 +41,11 @@ config :questify, :embeddings,
   openai_url: "https://api.openai.com/v1/embeddings",
   openai_model: "text-embedding-ada-002"
 
+config :questify, :completions,
+  provider: :ollama,
+  ollama_url: ollama_url,
+  ollama_model: "mistral"
+
 config :instructor,
   adapter: Instructor.Adapters.OpenAI,
   openai: [

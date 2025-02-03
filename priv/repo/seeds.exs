@@ -14,15 +14,15 @@ alias Questify.Accounts
 alias Questify.Games
 alias Questify.Creator
 
-{:ok, cthulu_theme} =
-Creator.create_theme(%{
-  "name" => "Cthulu",
-  "description" => """
-  The Cthulhu Mythos is a shared universe of horror fiction, originated by the American writer H.P. Lovecraft in the early 20th century. It encompasses a series of interconnected stories that explore themes of cosmic horror, forbidden knowledge, the insignificance of humanity in the universe, and the existence of ancient, powerful entities. These entities, often referred to as "Old Ones" or "Elder Gods," exist beyond the realm of human understanding and are often depicted as incomprehensibly alien and malevolent.
-  """
-})
+# {:ok, cthulu_theme} =
+# Creator.create_theme(%{
+#   "name" => "Cthulu",
+#   "description" => """
+#   The Cthulhu Mythos is a shared universe of horror fiction, originated by the American writer H.P. Lovecraft in the early 20th century. It encompasses a series of interconnected stories that explore themes of cosmic horror, forbidden knowledge, the insignificance of humanity in the universe, and the existence of ancient, powerful entities. These entities, often referred to as "Old Ones" or "Elder Gods," exist beyond the realm of human understanding and are often depicted as incomprehensibly alien and malevolent.
+#   """
+# })
 
-Questify.Creator.chunk_file(cthulu_theme, "dev/books/cthulu.txt")
+# Questify.Creator.chunk_file(cthulu_theme, "dev/books/cthulu.txt")
 
 Creator.create_theme(%{
   "name" => "Vampires",
@@ -67,7 +67,7 @@ Questify.Creator.chunk_file(punk_theme, "dev/books/triplanet.txt")
     A simple game to test out game mechanics. You find yourself alone in a beautiful mansion during a summer party, but something sinister lurks nearby. Can you resist the temptation?
     """,
     "creator_id" => test_user.id,
-    "theme_id" => cthulu_theme.id
+    "theme_id" => epic_theme.id
   })
 
 Games.create_lore_action(hello_quest)

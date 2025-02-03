@@ -7,7 +7,7 @@ defmodule Questify.Repo.Migrations.AddExtraThemeFields do
     end
 
     alter table(:chunks) do
-      add :embedding, :vector, size: 768
+      add :embedding, :vector, size: 1024
     end
   end
 end

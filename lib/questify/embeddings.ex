@@ -16,6 +16,9 @@ defmodule Questify.Embeddings do
   end
 
   defp embed_ollama(text, config) do
+    # Add a small delay to prevent server overload
+    Process.sleep(50)
+    
     response =
       HTTPoison.post(
         "#{config[:ollama_url]}/api/embeddings",

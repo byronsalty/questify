@@ -3,7 +3,7 @@ defmodule Questify.Repo.Migrations.AddCommandEmbeddings do
 
   def change do
     alter table(:actions) do
-      add :embedding, :vector, size: 768
+      add :embedding, :vector, size: 1024
     end
   end
 end

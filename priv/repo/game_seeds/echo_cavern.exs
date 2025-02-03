@@ -18,7 +18,7 @@ epic_theme = Creator.get_theme_by_name!("Epic")
   "theme_id" => epic_theme.id
 })
 
-Games.create_lore_action(echo)
+# Games.create_lore_action(echo)
 Games.create_trailblaze_action(echo)
 
 {:ok, house} = Games.create_location(%{

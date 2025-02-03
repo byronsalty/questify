@@ -43,7 +43,7 @@ Creator.create_theme(%{
   The cyberpunk theme immerses audiences in a dystopian future characterized by advanced technology, cybernetic enhancements, sprawling urban landscapes, and profound social divides. At its core, cyberpunk explores the fusion of man and machine, the impact of high-tech societies on human interaction, and the consequences of corporate dominance in an increasingly digital world. This genre often features protagonists who are hackers, rebels, or outcasts, navigating a world where information is power and technology is both a tool for liberation and a means of oppression. Cyberpunk settings are marked by neon-lit streets, towering skyscrapers, and a pervasive sense of decay, illustrating a stark contrast between the gleaming promises of technology and the grim realities of life in the underbelly of futuristic megacities. Themes of identity, privacy, and autonomy run deep, as characters grapple with artificial intelligence, virtual reality, and the blurring lines between physical and digital existence. Through gritty narratives filled with anti-heroes, mega-corporations, and cybernetic enhancements, cyberpunk offers a critical look at the potential future of human society, emphasizing the importance of maintaining one's humanity in the face of overwhelming technological advancement and societal fragmentation."
 })
 
-Questify.Creator.chunk_file(punk_theme, "dev/books/triplanet.txt")
+# Questify.Creator.chunk_file(punk_theme, "dev/books/triplanet.txt")
 
 {:ok, epic_theme}  = Creator.create_theme(%{
   "name" => "Epic",

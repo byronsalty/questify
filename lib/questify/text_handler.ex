@@ -15,7 +15,8 @@ defmodule Questify.TextHandler do
 
   def get_completion(text) do
     text_model = "gpt-3.5-turbo"
-    openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
+    openai_config = Application.get_env(:instructor, :openai)
+    openai_api_key = openai_config[:api_key]
     openai_completion_url = "https://api.openai.com/v1/chat/completions"
 
     # Setup the request data
@@ -27,7 +28,8 @@ defmodule Questify.TextHandler do
 
   def stream_completion(hash, text) do
     text_model = "gpt-3.5-turbo"
-    openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
+    openai_config = Application.get_env(:instructor, :openai)
+    openai_api_key = openai_config[:api_key]
     openai_completion_url = "https://api.openai.com/v1/chat/completions"
 
     # Setup the request data

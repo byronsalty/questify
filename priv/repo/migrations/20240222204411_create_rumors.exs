@@ -6,7 +6,7 @@ defmodule Questify.Repo.Migrations.CreateRumors do
       add :trigger, :string
       add :description, :text
 
-      add :embedding, :vector, size: 1536
+      add :embedding, :vector, size: 768
 
       add :quest_id, references(:quests, on_delete: :nothing)
 

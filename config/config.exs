@@ -27,10 +27,7 @@ config :ex_aws,
   s3_bucket: "quest-publish"
 
 config :instructor,
-  adapter: Instructor.Adapters.OpenAI
-
-config :openai,
-  api_key: [{:system, "OPENAI_API_KEY"}, :instance_role],
+  adapter: Instructor.Adapters.Mock,
   http_options: [recv_timeout: 10 * 60 * 1000]
 
 # Configures the mailer

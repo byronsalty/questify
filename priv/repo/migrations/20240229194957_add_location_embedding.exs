@@ -3,7 +3,7 @@ defmodule Questify.Repo.Migrations.AddLocationEmbedding do
 
   def change do
     alter table(:locations) do
-      add :embedding, :vector, size: 1536
+      add :embedding, :vector, size: 768
     end
   end
 end

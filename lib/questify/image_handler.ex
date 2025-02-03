@@ -23,8 +23,10 @@ defmodule Questify.ImageHandler do
 
   @impl true
   def handle_cast({:generate_image, location_id, hash, file_name, prompt}, _state) do
-    openai_api_key = Application.get_env(:questify, :openai)[:openai_api_key]
-    endpoint = Application.get_env(:questify, :openai)[:image_gen_url]
+    # Get the configuration
+    openai_config = Application.get_env(:instructor, :openai)
+    openai_api_key = openai_config[:api_key]
+    endpoint = openai_config[:image_gen_url]
 
     IO.inspect(prompt, label: "request to generate received")
 

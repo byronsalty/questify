@@ -26,15 +26,27 @@ openai_api_key =
     environment variable OPENAI_API_KEY is missing
     """
 
-config :questify, :openai,
+ollama_url =
+  System.get_env("OLLAMA_URL") ||
+    raise """
+    environment variable OLLAMA_URL is missing.
+    Example: http://192.168.7.227:11434
+    """
+
+config :questify, :embeddings,
+  provider: :ollama,
+  ollama_url: ollama_url,
+  ollama_model: System.get_env("OLLAMA_MODEL") || "nomic-embed-text",
   openai_api_key: openai_api_key,
-  embedding_url: "https://api.openai.com/v1/embeddings",
-  embedding_model: "text-embedding-ada-002",
-  image_gen_url: "https://api.openai.com/v1/images/generations"
+  openai_url: "https://api.openai.com/v1/embeddings",
+  openai_model: "text-embedding-ada-002"
 
 config :instructor,
   adapter: Instructor.Adapters.OpenAI,
-  openai: [api_key: openai_api_key]
+  openai: [
+    api_key: openai_api_key,
+    image_gen_url: "https://api.openai.com/v1/images/generations"
+  ]
 
 if config_env() == :prod do
   database_url =
@@ -51,7 +63,13 @@ if config_env() == :prod do
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6,
-    ssl: [cacerts: :public_key.cacerts_get()]
+    show_sensitive_data_on_connection_error: true,
+    ssl: true,
+    ssl_opts: [
+      server_name_indication: ~c"ep-tiny-pine-a5ub39yy.us-east-2.aws.neon.tech",
+      verify: :verify_none
+    ]
+    # ssl: [cacerts: :public_key.cacerts_get()]
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

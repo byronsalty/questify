@@ -554,4 +554,8 @@ defmodule Questify.Games do
   def change_play(%Play{} = play, attrs \\ %{}) do
     Play.changeset(play, attrs)
   end
+
+  def preload_quest_locations(quest) do
+    Questify.Repo.preload(quest, :locations)
+  end
 end

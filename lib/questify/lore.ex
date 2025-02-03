@@ -31,7 +31,7 @@ defmodule Questify.Lore do
   def generate_lore_from_text(quest, text) do
     lore_prompt = generate_lore_prompt(quest, text)
 
-    Questify.Text.get_completion(lore_prompt)
+    Questify.TextHandler.get_completion(lore_prompt)
   end
 
   def get_related_lore(location, user_input) do

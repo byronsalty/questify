@@ -1,5 +1,4 @@
 defmodule QuestifyWeb.ActionLive.Index do
-  alias Ecto.Repo
   use QuestifyWeb, :live_view
 
   alias Questify.Games
@@ -17,7 +16,7 @@ defmodule QuestifyWeb.ActionLive.Index do
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     action = Games.get_action!(id)
-    quest = Games.get_quest!(action.quest_id) |> Repo.preload(:locations)
+    quest = Games.get_quest!(action.quest_id) |> Games.preload_quest_locations()
     locations = quest.locations |> Enum.map(&{&1.name, &1.id})
 
     socket
@@ -29,8 +28,7 @@ defmodule QuestifyWeb.ActionLive.Index do
 
   defp apply_action(socket, :new, %{"location_id" => from_id}) do
     from = Games.get_location!(from_id)
-
-    quest = Games.get_quest!(from.quest_id) |> Repo.preload(:locations)
+    quest = Games.get_quest!(from.quest_id) |> Games.preload_quest_locations()
     locations = quest.locations |> Enum.map(&{&1.name, &1.id})
 
     socket

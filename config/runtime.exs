@@ -47,11 +47,7 @@ config :questify, :completions,
   ollama_model: "mistral"
 
 config :instructor,
-  adapter: Instructor.Adapters.OpenAI,
-  openai: [
-    api_key: openai_api_key,
-    image_gen_url: "https://api.openai.com/v1/images/generations"
-  ]
+  adapter: Instructor.Adapters.Ollama
 
 if config_env() == :prod do
   database_url =

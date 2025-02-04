@@ -8,6 +8,7 @@ defmodule Questify.Embeddings do
       :openai -> embed_openai(text, config)
       _ -> {:error, :invalid_provider}
     end
+    |> IO.inspect(label: "embed response")
   end
 
   def embed!(text, opts \\ []) when is_binary(text) do
@@ -18,7 +19,7 @@ defmodule Questify.Embeddings do
   defp embed_ollama(text, config) do
     # Add a small delay to prevent server overload
     Process.sleep(50)
-    
+
     response =
       HTTPoison.post(
         "#{config[:ollama_url]}/api/embeddings",

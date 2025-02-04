@@ -153,21 +153,42 @@ defmodule Questify.Games do
 
   def get_location_by_text(quest, text) do
     embedding = Questify.Embeddings.embed!(text)
-    min_distance = 0.15
 
-    Repo.all(
-      from l in Location,
-        order_by: cosine_distance(l.embedding, ^embedding),
-        limit: 1,
-        where: cosine_distance(l.embedding, ^embedding) < ^min_distance,
-        where: l.quest_id == ^quest.id
-    )
+    # Phase 1: Try to find locations with from_id (connected locations) with tighter similarity
+    case get_locations_with_criteria(quest, embedding, true, 0.3) do
+      [] ->
+        # Phase 2: If no connected locations found, try root locations with looser similarity
+        get_locations_with_criteria(quest, embedding, false, 0.5)
+      locations ->
+        locations
+    end
   end
 
-  # def get_location_action_options(location) do
-  #   location.actions
-  #     |> Enum.with_index(fn action, ind -> {ind + 1, action.command, action.id} end)
-  # end
+  defp get_locations_with_criteria(quest, embedding, connected?, min_distance) do
+    from_id_condition = if connected?, do: dynamic([l], not is_nil(l.from_id)), else: dynamic([l], is_nil(l.from_id))
+
+    locations_with_distances =
+      Repo.all(
+        from l in Location,
+          where: l.quest_id == ^quest.id,
+          where: ^from_id_condition,
+          select: {l, fragment("1 - (? <=> ?)", l.embedding, ^embedding)},
+          order_by: fragment("1 - (? <=> ?)", l.embedding, ^embedding),
+          limit: 5
+      )
+
+    # Print out the distances for debugging
+    locations_with_distances
+    |> Enum.each(fn {location, distance} ->
+      location_type = if connected?, do: "Connected", else: "Root"
+      IO.puts("#{location_type} Location: #{location.name} - Distance: #{distance}")
+    end)
+
+    # Return only locations that meet the minimum distance threshold
+    locations_with_distances
+    |> Enum.filter(fn {_location, distance} -> distance >= min_distance end)
+    |> Enum.map(fn {location, _distance} -> location end)
+  end
 
   def get_location_action_hint(location) do
     # action_options = get_location_action_options(location)
@@ -419,7 +440,8 @@ defmodule Questify.Games do
 
   def create_trailblaze_action(quest) do
     triggers = [
-      "Create a path to a location.",
+      "Find something",
+      "Look around for something",
       "Move to a location.",
       "Go to a location."
     ]

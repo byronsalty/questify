@@ -14,27 +14,57 @@ defmodule Questify.Creator do
   alias Questify.Games
 
 
-  def get_or_generate_location(quest, name) do
-    IO.puts("Creating a location for #{quest.name} - named: #{name}")
+  def get_or_generate_location(quest, from_location, name) do
+    processed_name = preprocess_action_text(name)
+    IO.puts("Creating a location for #{quest.name} - processed name: #{processed_name} (from: #{name})")
 
-    locations = Games.get_location_by_text(quest, name)
+    locations = Games.get_location_by_text(quest, processed_name)
     if Enum.count(locations) > 0 do
       hd(locations)
     else
       IO.puts("lets create one!")
-      generate_location(quest, name)
+      generate_location(quest, from_location, processed_name)
     end
   end
 
-  def generate_location_data(quest, name_text) do
-    theme = get_theme!(quest.theme_id)
-    related_chunks = get_theme_chunks(theme, name_text)
+  def preprocess_action_text(action_text) do
+    {:ok, result} =
+      Instructor.chat_completion(
+        model: "mistral",
+        response_model: Questify.Creator.LocationName,
+        max_retries: 3,
+        messages: [
+          %{
+            role: "system",
+            content: """
+            Your task is to extract the key location or scene from an action text.
+            For example:
+            - "let's check out the sandy beach" -> "sandy beach"
+            - "I want to explore the dark cave" -> "dark cave"
+            - "let's head over to the tavern" -> "tavern"
+            - "maybe we should investigate the mysterious tower" -> "mysterious tower"
 
-    rag_text =
-      related_chunks
-      |> Enum.map(fn c -> c.body end)
-      |> Enum.join("\n")
-      |> IO.inspect(label: "related context...")
+            Return ONLY the location/scene text, nothing else.
+            """
+          },
+          %{role: "user", content: action_text}
+        ]
+      )
+
+    result.name
+  end
+
+  def generate_location_data(quest, from_location, name_text) do
+    # theme = get_theme!(quest.theme_id)
+    # related_chunks = get_theme_chunks(theme, name_text)
+
+    # rag_text =
+    #   related_chunks
+    #   |> Enum.map(fn c -> c.body end)
+    #   |> Enum.join("\n")
+    #   |> IO.inspect(label: "related context...")
+
+    rag_text = from_location.name <> " - " <> from_location.description
 
     {:ok, gen} =
       Instructor.chat_completion(
@@ -45,7 +75,8 @@ defmodule Questify.Creator do
           %{
             role: "system",
             content: """
-            Your purpose is to create a Location in the current quest.
+            Your purpose is to create a Location or Scene based on the action: "#{name_text}"
+            This has been found by coming from from: "#{from_location.name}"
 
             CONTEXT FOR STYLE:
             ```
@@ -71,8 +102,8 @@ defmodule Questify.Creator do
     gen
   end
 
-  def generate_location(quest, name_text) do
-    gen = generate_location_data(quest, name_text)
+  def generate_location(quest, from_location, name_text) do
+    gen = generate_location_data(quest, from_location, name_text)
       |> IO.inspect(label: "location generation")
 
 
@@ -85,7 +116,7 @@ defmodule Questify.Creator do
   end
 
   def generate_path_to_location(quest, from_location, name_text) do
-    to_location = get_or_generate_location(quest, name_text)
+    to_location = get_or_generate_location(quest, from_location, name_text)
 
     generate_action(quest, from_location, to_location)
   end

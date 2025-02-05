@@ -1,9 +1,10 @@
 defmodule Questify.Creator.ActionGen do
   use Ecto.Schema
+  use Instructor
   use Instructor.Validator
   import Ecto.Changeset
 
-  @doc """
+  @llm_doc """
   ## Field Descriptions:
   - description: The description of the movement from one location to the other and what happens to them.
   - trigger: A phrase that someone might to trigger this action.

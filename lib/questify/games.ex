@@ -153,41 +153,15 @@ defmodule Questify.Games do
 
   def get_location_by_text(quest, text) do
     embedding = Questify.Embeddings.embed!(text)
+    min_distance = 0.15
 
-    # Phase 1: Try to find locations with from_id (connected locations) with tighter similarity
-    case get_locations_with_criteria(quest, embedding, true, 0.3) do
-      [] ->
-        # Phase 2: If no connected locations found, try root locations with looser similarity
-        get_locations_with_criteria(quest, embedding, false, 0.5)
-      locations ->
-        locations
-    end
-  end
-
-  defp get_locations_with_criteria(quest, embedding, connected?, min_distance) do
-    from_id_condition = if connected?, do: dynamic([l], not is_nil(l.from_id)), else: dynamic([l], is_nil(l.from_id))
-
-    locations_with_distances =
-      Repo.all(
-        from l in Location,
-          where: l.quest_id == ^quest.id,
-          where: ^from_id_condition,
-          select: {l, fragment("1 - (? <=> ?)", l.embedding, ^embedding)},
-          order_by: fragment("1 - (? <=> ?)", l.embedding, ^embedding),
-          limit: 5
-      )
-
-    # Print out the distances for debugging
-    locations_with_distances
-    |> Enum.each(fn {location, distance} ->
-      location_type = if connected?, do: "Connected", else: "Root"
-      IO.puts("#{location_type} Location: #{location.name} - Distance: #{distance}")
-    end)
-
-    # Return only locations that meet the minimum distance threshold
-    locations_with_distances
-    |> Enum.filter(fn {_location, distance} -> distance >= min_distance end)
-    |> Enum.map(fn {location, _distance} -> location end)
+    Repo.all(
+      from l in Location,
+        order_by: cosine_distance(l.embedding, ^embedding),
+        limit: 1,
+        where: cosine_distance(l.embedding, ^embedding) < ^min_distance,
+        where: l.quest_id == ^quest.id
+    )
   end
 
   def get_location_action_hint(location) do
@@ -363,7 +337,7 @@ defmodule Questify.Games do
 
   def get_action_by_text(location, text) do
     embedding = Questify.Embeddings.embed!(text)
-    min_distance = 0.5
+    min_distance = 0.35
     quest_id = location.quest_id
 
     IO.puts("\n=== Action Similarity Search ===")
@@ -371,39 +345,46 @@ defmodule Questify.Games do
     IO.puts("Location: #{location.name}")
     IO.puts("Quest ID: #{quest_id}")
 
-    # First get all actions with their distances
-    all_actions =
+    # First try location-specific actions
+    location_actions_all =
       Repo.all(
         from a in Action,
           select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
-          where: a.from_id == ^location.id or is_nil(a.from_id),
+          where: a.from_id == ^location.id,
           where: a.quest_id == ^quest_id,
-          order_by: cosine_distance(a.embedding, ^embedding)
+          order_by: [asc: cosine_distance(a.embedding, ^embedding)]
       )
 
-    # Log all actions and their distances
-    IO.puts("\nAll available actions and their cosine distances:")
-    Enum.each(all_actions, fn action ->
+    IO.puts("\n=== All Location Actions ===")
+    Enum.each(location_actions_all, fn action ->
       IO.puts("Command: #{action.command}")
-      IO.puts("Distance: #{Float.round(action.min_distance, 4)}")
-      IO.puts("Available from: #{if action.from_id, do: "this location only", else: "anywhere"}")
+      IO.puts("Distance: #{action.min_distance}")
       IO.puts("---")
     end)
 
-    # Filter for chosen actions
-    chosen = Enum.filter(all_actions, & &1.min_distance < min_distance)
+    # Now filter for minimum distance
+    location_actions =
+      location_actions_all
+      |> Enum.filter(fn action -> action.min_distance < min_distance end)
+      |> Enum.take(1)
 
-    IO.puts("\nChosen actions (distance < #{min_distance}):")
-    if Enum.empty?(chosen) do
-      IO.puts("No actions found within minimum distance threshold")
-    else
-      Enum.each(chosen, fn action ->
-        IO.puts("Selected: #{action.command} (distance: #{Float.round(action.min_distance, 4)})")
-      end)
+    case location_actions do
+      [action | _] ->
+        IO.puts("Found location-specific action: #{action.command}")
+        [action]
+      [] ->
+        # If no good location-specific matches, try global actions
+        IO.puts("No good location-specific matches, trying global actions...")
+        Repo.all(
+          from a in Action,
+            select: %{a | min_distance: cosine_distance(a.embedding, ^embedding)},
+            where: is_nil(a.from_id),
+            where: a.quest_id == ^quest_id,
+            where: cosine_distance(a.embedding, ^embedding) >= ^min_distance,
+            order_by: [asc: cosine_distance(a.embedding, ^embedding)],
+            limit: 1
+        )
     end
-    IO.puts("================================\n")
-
-    chosen
   end
 
   @doc """

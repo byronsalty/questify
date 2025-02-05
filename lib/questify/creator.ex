@@ -28,26 +28,36 @@ defmodule Questify.Creator do
   end
 
   def preprocess_action_text(action_text) do
+
+    IO.inspect(action_text, label: "extracting name from action_text")
     {:ok, result} =
       Instructor.chat_completion(
-        model: "mistral",
+        # model: "mistral",
+        model: "mistral:7b-instruct-q6_K",
+        mode: :json,
         response_model: Questify.Creator.LocationName,
         max_retries: 3,
         messages: [
           %{
             role: "system",
             content: """
-            Your task is to extract the key location or scene from an action text.
+            Your task is to extract the name of the location or scene from an action text.
             For example:
             - "let's check out the sandy beach" -> "sandy beach"
             - "I want to explore the dark cave" -> "dark cave"
             - "let's head over to the tavern" -> "tavern"
             - "maybe we should investigate the mysterious tower" -> "mysterious tower"
 
-            Return ONLY the location/scene text, nothing else.
+            Return ONLY the name field
+
+            The action text is: "#{action_text}"
             """
           },
-          %{role: "user", content: action_text}
+          %{role: "user",
+            content: """
+            Provide the name for this location or scene.
+            """
+          }
         ]
       )
 
@@ -68,7 +78,9 @@ defmodule Questify.Creator do
 
     {:ok, gen} =
       Instructor.chat_completion(
-        model: "gpt-3.5-turbo",
+        # model: "gpt-3.5-turbo",
+        model: "mistral:7b-instruct-q6_K",
+        mode: :json,
         response_model: Questify.Creator.LocationGen,
         max_retries: 3,
         messages: [
@@ -125,7 +137,9 @@ defmodule Questify.Creator do
 
     {:ok, gen} =
       Instructor.chat_completion(
-        model: "gpt-3.5-turbo",
+        # model: "gpt-3.5-turbo",
+        model: "mistral:7b-instruct-q6_K",
+        mode: :json,
         response_model: Questify.Creator.ActionGen,
         max_retries: 2,
         messages: [

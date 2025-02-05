@@ -36,18 +36,22 @@ ollama_url =
 config :questify, :embeddings,
   provider: :ollama,
   ollama_url: ollama_url,
-  ollama_model: System.get_env("OLLAMA_MODEL") || "nomic-embed-text",
-  openai_api_key: openai_api_key,
-  openai_url: "https://api.openai.com/v1/embeddings",
-  openai_model: "text-embedding-ada-002"
+  ollama_model: System.get_env("OLLAMA_MODEL") || "nomic-embed-text"
+  # openai_api_key: openai_api_key,
+  # openai_url: "https://api.openai.com/v1/embeddings",
+  # openai_model: "text-embedding-ada-002"
 
-config :questify, :completions,
-  provider: :ollama,
-  ollama_url: ollama_url,
-  ollama_model: "mistral"
+# config :questify, :completions,
+#   provider: :ollama,
+#   ollama_url: ollama_url,
+#   ollama_model: "mistral"
 
 config :instructor,
-  adapter: Instructor.Adapters.Ollama
+  adapter: Instructor.Adapters.OpenAI,
+  openai: [
+    api_key: "ollama",
+    api_url: System.get_env("OLLAMA_URL") || "http://localhost:11434"
+  ]
 
 if config_env() == :prod do
   database_url =

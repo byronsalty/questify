@@ -1,9 +1,10 @@
 defmodule Questify.Creator.LocationGen do
   use Ecto.Schema
+  use Instructor
   use Instructor.Validator
   import Ecto.Changeset
 
-  @doc """
+  @llm_doc """
   ## Field Descriptions:
   - description: A vivid and visual description of this location.
   - name: A name for this location

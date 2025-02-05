@@ -1,11 +1,12 @@
 defmodule Questify.Creator.LocationName do
   use Ecto.Schema
+  use Instructor
   use Instructor.Validator
   import Ecto.Changeset
 
-  @doc """
+  @llm_doc """
   ## Field Descriptions:
-  - name: A name for this location
+  - name: The name
   """
   @primary_key false
   embedded_schema do

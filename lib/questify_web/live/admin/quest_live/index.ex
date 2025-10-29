@@ -5,6 +5,9 @@ defmodule QuestifyWeb.QuestLive.Index do
   alias Questify.Games.Quest
   alias Questify.Accounts
 
+  # Idle timeout: 30 minutes for admin pages
+  @idle_timeout_ms 30 * 60 * 1000
+
   @impl true
   def mount(_params, session, socket) do
     socket = assign_current_user(socket, session)
@@ -12,6 +15,9 @@ defmodule QuestifyWeb.QuestLive.Index do
     IO.inspect(socket.assigns.current_user, label: "current_user")
 
     quests = Games.list_quests_by_user(socket.assigns.current_user)
+
+    # Start idle timeout timer
+    schedule_idle_timeout()
 
     {:ok, stream(socket, :quests, quests)}
   end
@@ -47,10 +53,19 @@ defmodule QuestifyWeb.QuestLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     quest = Games.get_quest!(id)
     {:ok, _} = Games.delete_quest(quest)
 
     {:noreply, stream_delete(socket, :quests, quest)}
+  end
+
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
   end
 
   defp assign_current_user(socket, session) do
@@ -63,5 +78,10 @@ defmodule QuestifyWeb.QuestLive.Index do
       %{} ->
         assign_new(socket, :current_user, fn -> nil end)
     end
+  end
+
+  # Schedule the idle timeout timer
+  defp schedule_idle_timeout do
+    Process.send_after(self(), :idle_timeout, @idle_timeout_ms)
   end
 end

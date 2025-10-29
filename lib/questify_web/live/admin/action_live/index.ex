@@ -5,8 +5,14 @@ defmodule QuestifyWeb.ActionLive.Index do
   alias Questify.Games
   alias Questify.Games.Action
 
+  # Idle timeout: 30 minutes for admin pages
+  @idle_timeout_ms 30 * 60 * 1000
+
   @impl true
   def mount(_params, _session, socket) do
+    # Start idle timeout timer
+    schedule_idle_timeout()
+
     {:ok, stream(socket, :actions, Games.list_actions())}
   end
 
@@ -53,9 +59,23 @@ defmodule QuestifyWeb.ActionLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     action = Games.get_action!(id)
     {:ok, _} = Games.delete_action(action)
 
     {:noreply, stream_delete(socket, :actions, action)}
+  end
+
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
+  # Schedule the idle timeout timer
+  defp schedule_idle_timeout do
+    Process.send_after(self(), :idle_timeout, @idle_timeout_ms)
   end
 end

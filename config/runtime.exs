@@ -49,7 +49,12 @@ if config_env() == :prod do
 
   config :questify, Questify.Repo,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    # Reduced pool size for serverless database (Neon) to minimize idle connections
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "2"),
+    # Queue settings optimized for serverless - allows DB to auto-suspend faster
+    queue_target: 50,
+    queue_interval: 1000,
+    timeout: 15_000,
     socket_options: maybe_ipv6,
     ssl: [cacerts: :public_key.cacerts_get()]
 

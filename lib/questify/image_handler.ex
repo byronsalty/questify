@@ -66,12 +66,16 @@ defmodule Questify.ImageHandler do
     write_file_to_s3(file_name, file_response.body, "image/png")
     |> IO.inspect(label: "write_file_to_s3")
 
-    location = Questify.Games.get_location!(location_id)
     {cdn_url, _} = create_img_url(hash)
 
-    Questify.Games.update_location_no_gen(location, %{
-      "img_url" => cdn_url
-    })
+    # Use explicit checkout to ensure DB connection is released immediately
+    # This prevents the GenServer from holding connections indefinitely
+    Questify.Repo.checkout(fn ->
+      location = Questify.Games.get_location!(location_id)
+      Questify.Games.update_location_no_gen(location, %{
+        "img_url" => cdn_url
+      })
+    end, timeout: 5_000)
 
     #broadcast that file is ready on s3
     broadcast_complete(hash)

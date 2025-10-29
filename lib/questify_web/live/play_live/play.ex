@@ -5,10 +5,15 @@ defmodule QuestifyWeb.PlayLive.Play do
   alias Questify.Repo
 
   @topic "generations"
+  # Idle timeout: 15 minutes (in milliseconds)
+  @idle_timeout_ms 15 * 60 * 1000
 
   @impl true
   def mount(_params, _session, socket) do
     QuestifyWeb.Endpoint.subscribe(@topic)
+
+    # Start idle timeout timer - will redirect to home if no user activity
+    schedule_idle_timeout()
 
     {:ok, socket, layout: false}
   end
@@ -53,6 +58,9 @@ defmodule QuestifyWeb.PlayLive.Play do
 
   @impl true
   def handle_event("do_action", %{"command" => user_text}, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     # Do something with the value
 
     # action_options = Games.get_location_action_options(socket.assigns.location)
@@ -90,6 +98,9 @@ defmodule QuestifyWeb.PlayLive.Play do
 
   @impl true
   def handle_event("continue", _, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     # Do something with the value
 
     Games.update_play(socket.assigns.play, %{rating: 1.0})
@@ -99,6 +110,9 @@ defmodule QuestifyWeb.PlayLive.Play do
 
   @impl true
   def handle_event("up_vote", _, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     # Do something with the value
 
     Games.update_play(socket.assigns.play, %{rating: 1.0})
@@ -108,6 +122,9 @@ defmodule QuestifyWeb.PlayLive.Play do
 
   @impl true
   def handle_event("down_vote", _, socket) do
+    # Reset idle timeout on user interaction
+    schedule_idle_timeout()
+
     # Do something with the value
 
     Games.update_play(socket.assigns.play, %{rating: 0.0})
@@ -245,4 +262,16 @@ defmodule QuestifyWeb.PlayLive.Play do
   #     send(pid, {:move, to_id})
   #   end)
   # end
+
+  # Handle idle timeout - redirect to home page (standard view, not LiveView)
+  # This terminates the LiveView process and socket connection, freeing DB resources
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
+  # Schedule the idle timeout timer
+  defp schedule_idle_timeout do
+    Process.send_after(self(), :idle_timeout, @idle_timeout_ms)
+  end
 end

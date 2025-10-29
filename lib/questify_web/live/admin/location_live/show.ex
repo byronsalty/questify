@@ -5,10 +5,15 @@ defmodule QuestifyWeb.LocationLive.Show do
   alias Questify.Repo
 
   @topic "generations"
+  # Idle timeout: 30 minutes for admin pages (admins may be referencing while working)
+  @idle_timeout_ms 30 * 60 * 1000
 
   @impl true
   def mount(_params, _session, socket) do
     QuestifyWeb.Endpoint.subscribe(@topic)
+
+    # Start idle timeout timer - will redirect to home if no activity
+    schedule_idle_timeout()
 
     {:ok, socket}
   end
@@ -44,4 +49,15 @@ defmodule QuestifyWeb.LocationLive.Show do
 
   defp page_title(:show), do: "Show Location"
   defp page_title(:edit), do: "Edit Location"
+
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
+  # Schedule the idle timeout timer
+  defp schedule_idle_timeout do
+    Process.send_after(self(), :idle_timeout, @idle_timeout_ms)
+  end
 end

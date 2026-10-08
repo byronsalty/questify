@@ -132,6 +132,13 @@ defmodule QuestifyWeb.PlayLive.Play do
     {:noreply, assign(socket, :voted, true)}
   end
 
+  # Handle idle timeout - redirect to home page (standard view, not LiveView)
+  # This terminates the LiveView process and socket connection, freeing DB resources
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
   @impl true
   def handle_info({:move, to_id}, socket) do
     # IO.inspect(to_id, label: "sending experience to new location")
@@ -150,7 +157,6 @@ defmodule QuestifyWeb.PlayLive.Play do
         },
         socket
       ) do
-
     if socket.assigns.hash == hash do
       updated_output = socket.assigns.output_description <> text
 
@@ -177,14 +183,13 @@ defmodule QuestifyWeb.PlayLive.Play do
   end
 
   def handle_info(
-    %Phoenix.Socket.Broadcast{
-      topic: @topic,
-      event: "image_complete",
-      payload: _
-    },
-    socket
-    ) do
-
+        %Phoenix.Socket.Broadcast{
+          topic: @topic,
+          event: "image_complete",
+          payload: _
+        },
+        socket
+      ) do
     location =
       Games.get_location!(socket.assigns.location.id)
 
@@ -204,7 +209,8 @@ defmodule QuestifyWeb.PlayLive.Play do
 
     {:noreply, socket}
   end
-    def handle_info(
+
+  def handle_info(
         %Phoenix.Socket.Broadcast{
           topic: @topic,
           event: "image_complete",
@@ -262,13 +268,6 @@ defmodule QuestifyWeb.PlayLive.Play do
   #     send(pid, {:move, to_id})
   #   end)
   # end
-
-  # Handle idle timeout - redirect to home page (standard view, not LiveView)
-  # This terminates the LiveView process and socket connection, freeing DB resources
-  @impl true
-  def handle_info(:idle_timeout, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/")}
-  end
 
   # Schedule the idle timeout timer
   defp schedule_idle_timeout do

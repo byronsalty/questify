@@ -45,6 +45,12 @@ defmodule QuestifyWeb.QuestLive.Index do
     |> assign(:quest, nil)
   end
 
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
   @impl true
   def handle_info({QuestifyWeb.QuestLive.FormComponent, {:saved, quest}}, socket) do
     IO.inspect(quest, label: "saving")
@@ -60,12 +66,6 @@ defmodule QuestifyWeb.QuestLive.Index do
     {:ok, _} = Games.delete_quest(quest)
 
     {:noreply, stream_delete(socket, :quests, quest)}
-  end
-
-  # Handle idle timeout - redirect to home page
-  @impl true
-  def handle_info(:idle_timeout, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/")}
   end
 
   defp assign_current_user(socket, session) do

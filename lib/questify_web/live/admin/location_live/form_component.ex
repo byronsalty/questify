@@ -76,6 +76,7 @@ defmodule QuestifyWeb.LocationLive.FormComponent do
   defp save_location(socket, :new, location_params) do
     quest = Games.get_quest!(location_params["quest_id"])
     gen = Questify.Creator.generate_location_data(quest, location_params["name"])
+
     location_params =
       location_params
       |> Map.put("name", gen.name)

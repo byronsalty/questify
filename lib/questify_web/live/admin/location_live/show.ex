@@ -31,6 +31,12 @@ defmodule QuestifyWeb.LocationLive.Show do
      |> assign(:location, location)}
   end
 
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
   @impl true
   def handle_info(
         %Phoenix.Socket.Broadcast{
@@ -49,12 +55,6 @@ defmodule QuestifyWeb.LocationLive.Show do
 
   defp page_title(:show), do: "Show Location"
   defp page_title(:edit), do: "Edit Location"
-
-  # Handle idle timeout - redirect to home page
-  @impl true
-  def handle_info(:idle_timeout, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/")}
-  end
 
   # Schedule the idle timeout timer
   defp schedule_idle_timeout do

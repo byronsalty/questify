@@ -13,11 +13,11 @@ defmodule Questify.Creator do
 
   alias Questify.Games
 
-
   def get_or_generate_location(quest, name) do
     IO.puts("Creating a location for #{quest.name} - named: #{name}")
 
     locations = Games.get_location_by_text(quest, name)
+
     if Enum.count(locations) > 0 do
       hd(locations)
     else
@@ -72,15 +72,17 @@ defmodule Questify.Creator do
   end
 
   def generate_location(quest, name_text) do
-    gen = generate_location_data(quest, name_text)
+    gen =
+      generate_location_data(quest, name_text)
       |> IO.inspect(label: "location generation")
 
+    {:ok, location} =
+      Questify.Games.create_location(%{
+        "quest_id" => quest.id,
+        "name" => gen.name,
+        "description" => gen.description
+      })
 
-    {:ok, location} = Questify.Games.create_location(%{
-      "quest_id" => quest.id,
-      "name" => gen.name,
-      "description" => gen.description
-    })
     location
   end
 
@@ -91,7 +93,6 @@ defmodule Questify.Creator do
   end
 
   def generate_action(quest, from_location, to_location) do
-
     {:ok, gen} =
       Instructor.chat_completion(
         model: "gpt-3.5-turbo",
@@ -177,7 +178,6 @@ defmodule Questify.Creator do
         where: cosine_distance(c.embedding, ^embedding) < ^min_distance,
         where: c.theme_id == ^theme.id
     )
-
   end
 
   @doc """
@@ -245,18 +245,18 @@ defmodule Questify.Creator do
     Theme.changeset(theme, attrs)
   end
 
-
   # Filter out lines that don't have many word chars
   # Then group 30 lines together to form a 'Chunk'
   # A better strategy would be to do semantic grouping
   def chunk_file(theme, file_path) do
     File.stream!(file_path)
     |> Stream.filter(fn ln ->
-      String.replace(ln, ~r/\W/, "")|> String.length() >= 10
+      String.replace(ln, ~r/\W/, "") |> String.length() >= 10
     end)
     |> Stream.chunk_every(30)
     |> Stream.each(fn lines ->
       block = Enum.join(lines, "")
+
       create_chunk(%{
         "theme_id" => theme.id,
         "body" => block
@@ -364,7 +364,6 @@ defmodule Questify.Creator do
   end
 
   defp add_chunk_embedding(attrs) do
-
     embedding = Questify.Embeddings.embed!(attrs["body"])
     Map.put(attrs, "embedding", embedding)
   end

@@ -1,5 +1,5 @@
 defmodule QuestifyWeb.ActionLive.Index do
-  alias Ecto.Repo
+  alias Questify.Repo
   use QuestifyWeb, :live_view
 
   alias Questify.Games
@@ -52,6 +52,12 @@ defmodule QuestifyWeb.ActionLive.Index do
     |> assign(:action, nil)
   end
 
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
   @impl true
   def handle_info({QuestifyWeb.ActionLive.FormComponent, {:saved, action}}, socket) do
     {:noreply, stream_insert(socket, :actions, action)}
@@ -66,12 +72,6 @@ defmodule QuestifyWeb.ActionLive.Index do
     {:ok, _} = Games.delete_action(action)
 
     {:noreply, stream_delete(socket, :actions, action)}
-  end
-
-  # Handle idle timeout - redirect to home page
-  @impl true
-  def handle_info(:idle_timeout, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/")}
   end
 
   # Schedule the idle timeout timer

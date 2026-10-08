@@ -46,6 +46,12 @@ defmodule QuestifyWeb.LocationLive.Index do
     |> assign(:location, nil)
   end
 
+  # Handle idle timeout - redirect to home page
+  @impl true
+  def handle_info(:idle_timeout, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
   @impl true
   def handle_info({QuestifyWeb.LocationLive.FormComponent, {:saved, location}}, socket) do
     {:noreply, stream_insert(socket, :locations, location)}
@@ -60,12 +66,6 @@ defmodule QuestifyWeb.LocationLive.Index do
     {:ok, _} = Games.delete_location(location)
 
     {:noreply, stream_delete(socket, :locations, location)}
-  end
-
-  # Handle idle timeout - redirect to home page
-  @impl true
-  def handle_info(:idle_timeout, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/")}
   end
 
   # Schedule the idle timeout timer

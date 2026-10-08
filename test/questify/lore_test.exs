@@ -8,7 +8,8 @@ defmodule Questify.LoreTest do
 
     import Questify.LoreFixtures
 
-    @invalid_attrs %{description: nil, trigger: nil}
+    # Lore reads string keys for rumors (as submitted by forms).
+    @invalid_attrs %{"description" => nil, "trigger" => ""}
 
     test "list_rumors/0 returns all rumors" do
       rumor = rumor_fixture()
@@ -21,7 +22,7 @@ defmodule Questify.LoreTest do
     end
 
     test "create_rumor/1 with valid data creates a rumor" do
-      valid_attrs = %{description: "some description", trigger: "some trigger"}
+      valid_attrs = %{"description" => "some description", "trigger" => "some trigger"}
 
       assert {:ok, %Rumor{} = rumor} = Lore.create_rumor(valid_attrs)
       assert rumor.description == "some description"
@@ -34,7 +35,11 @@ defmodule Questify.LoreTest do
 
     test "update_rumor/2 with valid data updates the rumor" do
       rumor = rumor_fixture()
-      update_attrs = %{description: "some updated description", trigger: "some updated trigger"}
+
+      update_attrs = %{
+        "description" => "some updated description",
+        "trigger" => "some updated trigger"
+      }
 
       assert {:ok, %Rumor{} = rumor} = Lore.update_rumor(rumor, update_attrs)
       assert rumor.description == "some updated description"

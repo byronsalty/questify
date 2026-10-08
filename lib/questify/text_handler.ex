@@ -99,7 +99,6 @@ defmodule Questify.TextHandler do
             handle_chunk(hash, x)
           end)
 
-
         last = Enum.reverse(data) |> hd()
 
         if last != @done do
@@ -125,6 +124,7 @@ defmodule Questify.TextHandler do
     broadcast_complete(hash)
     @done
   end
+
   defp handle_chunk(hash, str) do
     text =
       Jason.decode!(str)

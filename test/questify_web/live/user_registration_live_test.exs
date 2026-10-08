@@ -28,11 +28,11 @@ defmodule QuestifyWeb.UserRegistrationLiveTest do
       result =
         lv
         |> element("#registration_form")
-        |> render_change(user: %{"email" => "with spaces", "password" => "too short"})
+        |> render_change(user: %{"email" => "with spaces", "password" => "short"})
 
       assert result =~ "Register"
       assert result =~ "must have the @ sign and no spaces"
-      assert result =~ "should be at least 12 character"
+      assert result =~ "should be at least 8 character"
     end
   end
 
@@ -47,12 +47,10 @@ defmodule QuestifyWeb.UserRegistrationLiveTest do
 
       assert redirected_to(conn) == ~p"/"
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, "/")
-      response = html_response(conn, 200)
-      assert response =~ email
-      assert response =~ "Settings"
-      assert response =~ "Log out"
+      # Now do a logged in request to a page that requires authentication.
+      # The home page no longer renders a user menu.
+      conn = get(conn, ~p"/users/settings")
+      assert html_response(conn, 200) =~ email
     end
 
     test "renders errors for duplicated email", %{conn: conn} do

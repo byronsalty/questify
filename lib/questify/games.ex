@@ -49,7 +49,8 @@ defmodule Questify.Games do
   """
   def get_quest!(id), do: Repo.get!(Quest, id) |> Repo.preload([:locations, :theme])
 
-  def get_quest_by_slug!(slug), do: Repo.get_by!(Quest, slug: slug) |> Repo.preload([:locations, :theme])
+  def get_quest_by_slug!(slug),
+    do: Repo.get_by!(Quest, slug: slug) |> Repo.preload([:locations, :theme])
 
   @spec create_quest(
           :invalid
@@ -219,6 +220,7 @@ defmodule Questify.Games do
         IO.inspect(location, label: "location after if in create")
 
         {:ok, location}
+
       other ->
         other
     end
@@ -249,7 +251,6 @@ defmodule Questify.Games do
         {url, filename} = ImageHandler.create_img_url(hash)
 
         if location.img_url != url do
-
           prompt = """
           CONTEXT
           Generate an image portraying the following scene for a retro adventure video game.
@@ -261,6 +262,8 @@ defmodule Questify.Games do
 
           # update_location_no_gen(location, %{img_url: url})
         end
+
+        {:ok, location}
 
       other ->
         other
@@ -401,6 +404,7 @@ defmodule Questify.Games do
       "Move to a location.",
       "Go to a location."
     ]
+
     description = "Replace with action"
 
     Enum.each(triggers, fn trigger ->

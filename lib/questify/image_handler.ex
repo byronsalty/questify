@@ -10,10 +10,15 @@ defmodule Questify.ImageHandler do
   end
 
   def generate_image(location_id, hash, filename, prompt) do
-    # create a post request to the server
-    IO.inspect(prompt, label: "starting generation for prompt")
+    # Disabled in test (see config/test.exs) so no OpenAI/S3 calls are made.
+    if Application.get_env(:questify, :generate_images, true) do
+      # create a post request to the server
+      IO.inspect(prompt, label: "starting generation for prompt")
 
-    GenServer.cast(__MODULE__, {:generate_image, location_id, hash, filename, prompt})
+      GenServer.cast(__MODULE__, {:generate_image, location_id, hash, filename, prompt})
+    else
+      :ok
+    end
   end
 
   @impl true
@@ -70,14 +75,18 @@ defmodule Questify.ImageHandler do
 
     # Use explicit checkout to ensure DB connection is released immediately
     # This prevents the GenServer from holding connections indefinitely
-    Questify.Repo.checkout(fn ->
-      location = Questify.Games.get_location!(location_id)
-      Questify.Games.update_location_no_gen(location, %{
-        "img_url" => cdn_url
-      })
-    end, timeout: 5_000)
+    Questify.Repo.checkout(
+      fn ->
+        location = Questify.Games.get_location!(location_id)
 
-    #broadcast that file is ready on s3
+        Questify.Games.update_location_no_gen(location, %{
+          "img_url" => cdn_url
+        })
+      end,
+      timeout: 5_000
+    )
+
+    # broadcast that file is ready on s3
     broadcast_complete(hash)
 
     {:noreply, nil}

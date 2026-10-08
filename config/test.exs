@@ -41,3 +41,9 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Keep the suite hermetic: no OpenAI calls for embeddings, Instructor
+# completions or image generation.
+config :questify, :embeddings_adapter, Questify.Embeddings.Stub
+config :questify, :generate_images, false
+config :instructor, adapter: Questify.InstructorStub

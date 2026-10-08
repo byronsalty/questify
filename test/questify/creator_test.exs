@@ -64,7 +64,8 @@ defmodule Questify.CreatorTest do
 
     import Questify.CreatorFixtures
 
-    @invalid_attrs %{body: nil}
+    # Creator reads string keys for chunks (as submitted by forms).
+    @invalid_attrs %{"body" => ""}
 
     test "list_chunks/0 returns all chunks" do
       chunk = chunk_fixture()
@@ -77,7 +78,8 @@ defmodule Questify.CreatorTest do
     end
 
     test "create_chunk/1 with valid data creates a chunk" do
-      valid_attrs = %{body: "some body"}
+      theme = theme_fixture()
+      valid_attrs = %{"body" => "some body", "theme_id" => theme.id}
 
       assert {:ok, %Chunk{} = chunk} = Creator.create_chunk(valid_attrs)
       assert chunk.body == "some body"
@@ -89,7 +91,7 @@ defmodule Questify.CreatorTest do
 
     test "update_chunk/2 with valid data updates the chunk" do
       chunk = chunk_fixture()
-      update_attrs = %{body: "some updated body"}
+      update_attrs = %{"body" => "some updated body"}
 
       assert {:ok, %Chunk{} = chunk} = Creator.update_chunk(chunk, update_attrs)
       assert chunk.body == "some updated body"

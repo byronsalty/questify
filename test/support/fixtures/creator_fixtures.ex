@@ -21,13 +21,23 @@ defmodule Questify.CreatorFixtures do
 
   @doc """
   Generate a chunk.
+
+  `Creator.create_chunk/1` reads string keys, so the attrs are stringified.
   """
   def chunk_fixture(attrs \\ %{}) do
+    attrs =
+      if Map.has_key?(attrs, :theme_id) do
+        attrs
+      else
+        Map.put(attrs, :theme_id, theme_fixture().id)
+      end
+
     {:ok, chunk} =
       attrs
       |> Enum.into(%{
         body: "some body"
       })
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
       |> Questify.Creator.create_chunk()
 
     chunk

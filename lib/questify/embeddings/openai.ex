@@ -1,4 +1,11 @@
-defmodule Questify.Embeddings do
+defmodule Questify.Embeddings.OpenAI do
+  @moduledoc """
+  Embeddings adapter that calls the OpenAI embeddings API.
+  """
+
+  @behaviour Questify.Embeddings
+
+  @impl true
   def embed(text, opts \\ []) when is_binary(text) do
     embedding_url = Application.get_env(:questify, :openai)[:embedding_url]
     embedding_model = Application.get_env(:questify, :openai)[:embedding_model]
@@ -42,10 +49,5 @@ defmodule Questify.Embeddings do
             {:error, error}
         end
     end
-  end
-
-  def embed!(text, opts \\ []) when is_binary(text) do
-    {:ok, %{embedding: embedding}} = embed(text, opts)
-    embedding
   end
 end

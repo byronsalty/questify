@@ -17,11 +17,18 @@ defmodule Questify.GamesTest do
 
     test "get_quest!/1 returns the quest with given id" do
       quest = quest_fixture()
-      assert Games.get_quest!(quest.id) == quest
+      assert Games.get_quest!(quest.id) == Repo.preload(quest, [:locations, :theme])
     end
 
     test "create_quest/1 with valid data creates a quest" do
-      valid_attrs = %{name: "some name", description: "some description", slug: "some slug"}
+      user = Questify.AccountsFixtures.user_fixture()
+
+      valid_attrs = %{
+        name: "some name",
+        description: "some description",
+        slug: "some slug",
+        creator_id: user.id
+      }
 
       assert {:ok, %Quest{} = quest} = Games.create_quest(valid_attrs)
       assert quest.name == "some name"
@@ -51,7 +58,7 @@ defmodule Questify.GamesTest do
     test "update_quest/2 with invalid data returns error changeset" do
       quest = quest_fixture()
       assert {:error, %Ecto.Changeset{}} = Games.update_quest(quest, @invalid_attrs)
-      assert quest == Games.get_quest!(quest.id)
+      assert Repo.preload(quest, [:locations, :theme]) == Games.get_quest!(quest.id)
     end
 
     test "delete_quest/1 deletes the quest" do
@@ -71,7 +78,8 @@ defmodule Questify.GamesTest do
 
     import Questify.GamesFixtures
 
-    @invalid_attrs %{name: nil, description: nil}
+    # Games reads string keys for locations (as submitted by forms).
+    @invalid_attrs %{"name" => "", "description" => nil}
 
     test "list_locations/0 returns all locations" do
       location = location_fixture()
@@ -84,7 +92,13 @@ defmodule Questify.GamesTest do
     end
 
     test "create_location/1 with valid data creates a location" do
-      valid_attrs = %{name: "some name", description: "some description"}
+      quest = quest_fixture()
+
+      valid_attrs = %{
+        "name" => "some name",
+        "description" => "some description",
+        "quest_id" => quest.id
+      }
 
       assert {:ok, %Location{} = location} = Games.create_location(valid_attrs)
       assert location.name == "some name"
@@ -97,7 +111,7 @@ defmodule Questify.GamesTest do
 
     test "update_location/2 with valid data updates the location" do
       location = location_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description"}
+      update_attrs = %{"name" => "some updated name", "description" => "some updated description"}
 
       assert {:ok, %Location{} = location} = Games.update_location(location, update_attrs)
       assert location.name == "some updated name"
@@ -127,7 +141,8 @@ defmodule Questify.GamesTest do
 
     import Questify.GamesFixtures
 
-    @invalid_attrs %{command: nil, description: nil, is_terminal: nil}
+    # Games reads string keys for actions (as submitted by forms).
+    @invalid_attrs %{"command" => "", "description" => nil, "is_terminal" => nil}
 
     test "list_actions/0 returns all actions" do
       action = action_fixture()
@@ -140,7 +155,14 @@ defmodule Questify.GamesTest do
     end
 
     test "create_action/1 with valid data creates a action" do
-      valid_attrs = %{command: "some command", description: "some description", is_terminal: true}
+      quest = quest_fixture()
+
+      valid_attrs = %{
+        "command" => "some command",
+        "description" => "some description",
+        "is_terminal" => true,
+        "quest_id" => quest.id
+      }
 
       assert {:ok, %Action{} = action} = Games.create_action(valid_attrs)
       assert action.command == "some command"
@@ -199,11 +221,18 @@ defmodule Questify.GamesTest do
 
     test "get_play!/1 returns the play with given id" do
       play = play_fixture()
-      assert Games.get_play!(play.id) == play
+      assert Games.get_play!(play.id) == Repo.preload(play, [:quest, :location])
     end
 
     test "create_play/1 with valid data creates a play" do
-      valid_attrs = %{is_complete: true, rating: 120.5}
+      location = location_fixture()
+
+      valid_attrs = %{
+        is_complete: true,
+        rating: 120.5,
+        quest_id: location.quest_id,
+        location_id: location.id
+      }
 
       assert {:ok, %Play{} = play} = Games.create_play(valid_attrs)
       assert play.is_complete == true
@@ -226,7 +255,7 @@ defmodule Questify.GamesTest do
     test "update_play/2 with invalid data returns error changeset" do
       play = play_fixture()
       assert {:error, %Ecto.Changeset{}} = Games.update_play(play, @invalid_attrs)
-      assert play == Games.get_play!(play.id)
+      assert Repo.preload(play, [:quest, :location]) == Games.get_play!(play.id)
     end
 
     test "delete_play/1 deletes the play" do

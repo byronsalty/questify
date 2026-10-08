@@ -34,9 +34,12 @@ config :questify, :openai,
   embedding_model: "text-embedding-ada-002",
   image_gen_url: "https://api.openai.com/v1/images/generations"
 
-config :instructor,
-  adapter: Instructor.Adapters.OpenAI,
-  openai: [api_key: openai_api_key]
+config :instructor, openai: [api_key: openai_api_key]
+
+# config/test.exs points Instructor at a stub adapter; don't override it here.
+if config_env() != :test do
+  config :instructor, adapter: Instructor.Adapters.OpenAI
+end
 
 if config_env() == :prod do
   database_url =

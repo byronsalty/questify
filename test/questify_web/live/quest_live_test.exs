@@ -4,7 +4,7 @@ defmodule QuestifyWeb.QuestLiveTest do
   import Phoenix.LiveViewTest
   import Questify.GamesFixtures
 
-  @create_attrs %{name: "some name", description: "some description", slug: "some slug"}
+  @create_attrs %{name: "some name", description: "some description", slug: "some new slug"}
   @update_attrs %{
     name: "some updated name",
     description: "some updated description",
@@ -14,8 +14,9 @@ defmodule QuestifyWeb.QuestLiveTest do
 
   setup :register_and_log_in_user
 
-  defp create_quest(_) do
-    quest = quest_fixture()
+  # Quest pages only show quests created by the logged-in user.
+  defp create_quest(%{user: user}) do
+    quest = quest_fixture(%{creator_id: user.id})
     %{quest: quest}
   end
 

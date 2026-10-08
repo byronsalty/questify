@@ -30,6 +30,9 @@ defmodule Questify.GamesFixtures do
 
   @doc """
   Generate a location.
+
+  `Games.create_location/1` reads string keys (as submitted by forms), so the
+  attrs are stringified before being passed in.
   """
   def location_fixture(attrs \\ %{}) do
     attrs =
@@ -46,6 +49,7 @@ defmodule Questify.GamesFixtures do
         description: "some description",
         name: "some name"
       })
+      |> stringify_keys()
       |> Questify.Games.create_location()
 
     location
@@ -53,6 +57,8 @@ defmodule Questify.GamesFixtures do
 
   @doc """
   Generate a action.
+
+  `Games.create_action/1` reads string keys, so the attrs are stringified.
   """
   def action_fixture(attrs \\ %{}) do
     attrs =
@@ -79,6 +85,7 @@ defmodule Questify.GamesFixtures do
         description: "some description",
         is_terminal: true
       })
+      |> stringify_keys()
       |> Questify.Games.create_action()
 
     action
@@ -88,6 +95,14 @@ defmodule Questify.GamesFixtures do
   Generate a play.
   """
   def play_fixture(attrs \\ %{}) do
+    attrs =
+      if Map.has_key?(attrs, :location_id) do
+        attrs
+      else
+        location = location_fixture()
+        Map.merge(%{quest_id: location.quest_id, location_id: location.id}, attrs)
+      end
+
     {:ok, play} =
       attrs
       |> Enum.into(%{
@@ -98,4 +113,6 @@ defmodule Questify.GamesFixtures do
 
     play
   end
+
+  def stringify_keys(attrs), do: Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
 end

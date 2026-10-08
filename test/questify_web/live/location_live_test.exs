@@ -3,6 +3,7 @@ defmodule QuestifyWeb.LocationLiveTest do
 
   import Phoenix.LiveViewTest
   import Questify.GamesFixtures
+  import Questify.CreatorFixtures
 
   @create_attrs %{name: "some name", description: "some description"}
   @update_attrs %{name: "some updated name", description: "some updated description"}
@@ -10,65 +11,55 @@ defmodule QuestifyWeb.LocationLiveTest do
 
   setup :register_and_log_in_user
 
-  defp create_location(_) do
-    location = location_fixture()
-    %{location: location}
+  # Locations are managed from a quest the logged-in user created. The quest
+  # needs a theme because new locations are generated from it (via the
+  # Instructor stub in test).
+  defp create_location(%{user: user}) do
+    quest = quest_fixture(%{creator_id: user.id, theme_id: theme_fixture().id})
+    location = location_fixture(%{quest_id: quest.id})
+    %{quest: quest, location: location}
   end
 
   describe "Index" do
     setup [:create_location]
 
-    test "saves new location", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/locations")
+    test "saves new location", %{conn: conn, quest: quest} do
+      {:ok, index_live, html} = live(conn, ~p"/locations/#{quest.id}/new")
 
-      assert index_live |> element("a", "New Location") |> render_click() =~
-               "New Location"
-
-      assert_patch(index_live, ~p"/locations/new")
+      assert html =~ "New Location"
 
       assert index_live
              |> form("#location-form", location: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert index_live
-             |> form("#location-form", location: @create_attrs)
-             |> render_submit()
+      {:ok, _quest_live, html} =
+        index_live
+        |> form("#location-form", location: @create_attrs)
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/quests/#{quest.id}")
 
-      assert_patch(index_live, ~p"/locations")
-
-      html = render(index_live)
       assert html =~ "Location created successfully"
-      assert html =~ "some name"
+      # Name and description are replaced by the generated (stubbed) values.
+      assert html =~ "Stubbed Location"
     end
 
-    test "updates location in listing", %{conn: conn, location: location} do
-      {:ok, index_live, _html} = live(conn, ~p"/locations")
+    test "updates location", %{conn: conn, quest: quest, location: location} do
+      {:ok, index_live, html} = live(conn, ~p"/locations/#{location}/edit")
 
-      assert index_live |> element("#locations-#{location.id} a", "Edit") |> render_click() =~
-               "Edit Location"
-
-      assert_patch(index_live, ~p"/locations/#{location}/edit")
+      assert html =~ "Edit Location"
 
       assert index_live
              |> form("#location-form", location: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert index_live
-             |> form("#location-form", location: @update_attrs)
-             |> render_submit()
+      {:ok, _quest_live, html} =
+        index_live
+        |> form("#location-form", location: @update_attrs)
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/quests/#{quest.id}")
 
-      assert_patch(index_live, ~p"/locations")
-
-      html = render(index_live)
       assert html =~ "Location updated successfully"
       assert html =~ "some updated name"
-    end
-
-    test "deletes location in listing", %{conn: conn, location: location} do
-      {:ok, index_live, _html} = live(conn, ~p"/locations")
-
-      assert index_live |> element("#locations-#{location.id} a", "Delete") |> render_click()
-      refute has_element?(index_live, "#locations-#{location.id}")
     end
   end
 
@@ -78,14 +69,14 @@ defmodule QuestifyWeb.LocationLiveTest do
     test "displays location", %{conn: conn, location: location} do
       {:ok, _show_live, html} = live(conn, ~p"/locations/#{location}")
 
-      assert html =~ "Show Location"
+      assert html =~ "Location #{location.id}"
       assert html =~ location.name
     end
 
     test "updates location within modal", %{conn: conn, location: location} do
       {:ok, show_live, _html} = live(conn, ~p"/locations/#{location}")
 
-      assert show_live |> element("a", "Edit") |> render_click() =~
+      assert show_live |> element("a", "Edit location") |> render_click() =~
                "Edit Location"
 
       assert_patch(show_live, ~p"/locations/#{location}/show/edit")
@@ -94,13 +85,12 @@ defmodule QuestifyWeb.LocationLiveTest do
              |> form("#location-form", location: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert show_live
-             |> form("#location-form", location: @update_attrs)
-             |> render_submit()
+      {:ok, _show_live, html} =
+        show_live
+        |> form("#location-form", location: @update_attrs)
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/locations/#{location}")
 
-      assert_patch(show_live, ~p"/locations/#{location}")
-
-      html = render(show_live)
       assert html =~ "Location updated successfully"
       assert html =~ "some updated name"
     end

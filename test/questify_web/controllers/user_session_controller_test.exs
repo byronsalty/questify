@@ -17,12 +17,10 @@ defmodule QuestifyWeb.UserSessionControllerTest do
       assert get_session(conn, :user_token)
       assert redirected_to(conn) == ~p"/"
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
-      response = html_response(conn, 200)
-      assert response =~ user.email
-      assert response =~ ~p"/users/settings"
-      assert response =~ ~p"/users/log_out"
+      # Now do a logged in request to a page that requires authentication.
+      # The home page no longer renders a user menu.
+      conn = get(conn, ~p"/users/settings")
+      assert html_response(conn, 200) =~ user.email
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do

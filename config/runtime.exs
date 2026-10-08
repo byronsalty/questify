@@ -20,11 +20,13 @@ if System.get_env("PHX_SERVER") do
   config :questify, QuestifyWeb.Endpoint, server: true
 end
 
-openai_api_key =
-  System.get_env("OPENAI_API_KEY") ||
-    raise """
-    environment variable OPENAI_API_KEY is missing
-    """
+# Required in prod only. Dev and test (including Royale worker containers, which
+# have no OpenAI key) boot without it; code that calls OpenAI just fails if hit.
+openai_api_key = System.get_env("OPENAI_API_KEY")
+
+if config_env() == :prod && is_nil(openai_api_key) do
+  raise "environment variable OPENAI_API_KEY is missing"
+end
 
 config :questify, :openai,
   openai_api_key: openai_api_key,

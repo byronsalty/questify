@@ -8,12 +8,18 @@ config :bcrypt_elixir, :log_rounds, 1
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+#
+# Every connection field is overridable via TEST_DB_* so the same config runs
+# in Royale worker containers, where Postgres lives at `worker-test-db` (not
+# localhost) with its own credentials and a per-worker database name.
 config :questify, Questify.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  port: 5538,
-  database: "questify_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: System.get_env("TEST_DB_USER", "postgres"),
+  password: System.get_env("TEST_DB_PASS", "postgres"),
+  hostname: System.get_env("TEST_DB_HOST", "localhost"),
+  port: String.to_integer(System.get_env("TEST_DB_PORT", "5538")),
+  database:
+    System.get_env("TEST_DB_NAME") ||
+      "questify_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
